@@ -1,0 +1,12 @@
+{
+    "source": {
+        "include": ["./src/routes", "./src/controllers"],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(node_modules|\\.test\\.)"
+    },
+    "opts": {
+        "destination": "./docs/jsdoc",
+        "template": "node_modules/jsdoc/templates/default"
+    },
+    "plugins": ["plugins/markdown"]
+}

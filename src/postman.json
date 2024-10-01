@@ -1,0 +1,326 @@
+{
+	"info": {
+		"_postman_id": "4ab30970-827d-4c5f-afe8-2a3fd86d5619",
+		"name": "BGPS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20399660"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiY2NkYWUxM2EtNDlmMS00NjBlLWEwNGMtMzA1MDE1MGIwNTcyIiwiZmlyc3ROYW1lIjoidmljdG9yIiwibGFzdE5hbWUiOiJhemFtb3NhIiwiZW1haWwiOiJ2aWN0b3JhemFtb3NhQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlzQWN0aXZhdGVkIjp0cnVlLCJpc1ZlcmlmaWVkIjpmYWxzZSwicHJvZmlsZUltYWdlIjpudWxsLCJjcmVhdGVkQXQiOiIyMDI0LTAyLTI4VDE1OjIzOjU0LjgxMVoiLCJ1cGRhdGVkQXQiOiIyMDI0LTAyLTI4VDE1OjIzOjU0LjgxMVoiLCJwcm9maWxlIjp7ImlkIjoiNjZiM2M3YTQtZGEyYy00ZDg0LTg2ZWMtYzQ4NzI4OGQ4NTZlIiwicm9sZSI6IkFkbWluIiwiY3JlYXRlZEF0IjoiMjAyNC0wMi0yOFQxNToyMzo1NC44MjdaIiwidXBkYXRlZEF0IjoiMjAyNC0wMi0yOFQxNToyMzo1NC44MjdaIiwidXNlcklkIjoiY2NkYWUxM2EtNDlmMS00NjBlLWEwNGMtMzA1MDE1MGIwNTcyIn19LCJ0b2tlblR5cGUiOiJyZWZyZXNoIiwiZXhwaXJ5RGF0ZSI6IjIwMjQtMDMtMDZUMTU6MzA6MTguNTg3WiIsImlhdCI6MTcwOTEzNDIxOCwiZXhwIjoxNzA5MTM1MjE4fQ.Rc7dlL_f1uEYG7UGUk4CP05IaMkYElhXmFptsMsvNj0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"tonyzamosa@gmail.com\",\r\n    \"password\": \"Figurine19\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}/auth/login",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "The password must have 8 letters minimun"
+					},
+					"response": [
+						{
+							"name": "Error: Incorrect email",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"harryazamosa@gmail.com\",\r\n    \"password\": \"TestPassword1@\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/v1/auth/login",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Security-Policy",
+									"value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+								},
+								{
+									"key": "Cross-Origin-Opener-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "Cross-Origin-Resource-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "Origin-Agent-Cluster",
+									"value": "?1"
+								},
+								{
+									"key": "Referrer-Policy",
+									"value": "no-referrer"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=15552000; includeSubDomains"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-DNS-Prefetch-Control",
+									"value": "off"
+								},
+								{
+									"key": "X-Download-Options",
+									"value": "noopen"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "X-Permitted-Cross-Domain-Policies",
+									"value": "none"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "58"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"3a-T8wXSoJopLlt3jrtNvV9820ov1k\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 01 Mar 2024 21:09:25 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Incorrect email or password\"\n}"
+						},
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"tonyzamosa@gmail.com\",\r\n    \"password\": \"Figurine19\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/v1/auth/login",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Security-Policy",
+									"value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+								},
+								{
+									"key": "Cross-Origin-Opener-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "Cross-Origin-Resource-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "Origin-Agent-Cluster",
+									"value": "?1"
+								},
+								{
+									"key": "Referrer-Policy",
+									"value": "no-referrer"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=15552000; includeSubDomains"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-DNS-Prefetch-Control",
+									"value": "off"
+								},
+								{
+									"key": "X-Download-Options",
+									"value": "noopen"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "X-Permitted-Cross-Domain-Policies",
+									"value": "none"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2073"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"819-emAfVlDAjdKpO4azUW4zSTNIFgo\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 01 Mar 2024 21:11:46 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Login successful\",\n    \"data\": {\n        \"user\": {\n            \"fullName\": \"tony azamosa\",\n            \"id\": \"22879703-7f44-4699-8628-d49bbee07c08\",\n            \"firstName\": \"tony\",\n            \"lastName\": \"azamosa\",\n            \"email\": \"tonyzamosa@gmail.com\",\n            \"role\": \"Admin\",\n            \"isActivated\": true,\n            \"isVerified\": false,\n            \"profileImage\": null,\n            \"createdAt\": \"2024-03-01T00:22:00.898Z\",\n            \"updatedAt\": \"2024-03-01T00:22:00.898Z\"\n        },\n        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMjI4Nzk3MDMtN2Y0NC00Njk5LTg2MjgtZDQ5YmJlZTA3YzA4IiwiZmlyc3ROYW1lIjoidG9ueSIsImxhc3ROYW1lIjoiYXphbW9zYSIsImVtYWlsIjoidG9ueXphbW9zYUBnbWFpbC5jb20iLCJyb2xlIjoiQWRtaW4iLCJpc0FjdGl2YXRlZCI6dHJ1ZSwiaXNWZXJpZmllZCI6ZmFsc2UsInByb2ZpbGVJbWFnZSI6bnVsbCwiY3JlYXRlZEF0IjoiMjAyNC0wMy0wMVQwMDoyMjowMC44OThaIiwidXBkYXRlZEF0IjoiMjAyNC0wMy0wMVQwMDoyMjowMC44OThaIiwicHJvZmlsZSI6eyJpZCI6IjhmODNmZDE3LTEwNzYtNGNlYi1iNjJmLTg5MGQ5NWI5MGFhYyIsInJvbGUiOiJBZG1pbiIsImNyZWF0ZWRBdCI6IjIwMjQtMDMtMDFUMDA6MjI6MDAuOTM0WiIsInVwZGF0ZWRBdCI6IjIwMjQtMDMtMDFUMDA6MjI6MDAuOTM0WiIsInVzZXJJZCI6IjIyODc5NzAzLTdmNDQtNDY5OS04NjI4LWQ0OWJiZWUwN2MwOCJ9fSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiZXhwaXJ5RGF0ZSI6IjIwMjQtMDMtMDJUMDA6MTE6NDYuMjA1WiIsImlhdCI6MTcwOTMyNzUwNiwiZXhwIjoxNzA5MzI4NTA2fQ.jI3dD2T7qk8ve7EfC0s1W4dDVnt1PZRzigclMs4DL74\",\n        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMjI4Nzk3MDMtN2Y0NC00Njk5LTg2MjgtZDQ5YmJlZTA3YzA4IiwiZmlyc3ROYW1lIjoidG9ueSIsImxhc3ROYW1lIjoiYXphbW9zYSIsImVtYWlsIjoidG9ueXphbW9zYUBnbWFpbC5jb20iLCJyb2xlIjoiQWRtaW4iLCJpc0FjdGl2YXRlZCI6dHJ1ZSwiaXNWZXJpZmllZCI6ZmFsc2UsInByb2ZpbGVJbWFnZSI6bnVsbCwiY3JlYXRlZEF0IjoiMjAyNC0wMy0wMVQwMDoyMjowMC44OThaIiwidXBkYXRlZEF0IjoiMjAyNC0wMy0wMVQwMDoyMjowMC44OThaIiwicHJvZmlsZSI6eyJpZCI6IjhmODNmZDE3LTEwNzYtNGNlYi1iNjJmLTg5MGQ5NWI5MGFhYyIsInJvbGUiOiJBZG1pbiIsImNyZWF0ZWRBdCI6IjIwMjQtMDMtMDFUMDA6MjI6MDAuOTM0WiIsInVwZGF0ZWRBdCI6IjIwMjQtMDMtMDFUMDA6MjI6MDAuOTM0WiIsInVzZXJJZCI6IjIyODc5NzAzLTdmNDQtNDY5OS04NjI4LWQ0OWJiZWUwN2MwOCJ9fSwidG9rZW5UeXBlIjoicmVmcmVzaCIsImV4cGlyeURhdGUiOiIyMDI0LTAzLTA4VDIxOjExOjQ2LjIxOFoiLCJpYXQiOjE3MDkzMjc1MDYsImV4cCI6MTcwOTMyODUwNn0.0_gJqRVF8ACbC4rpoe6yboR5VK688r7o-UbgvT4mUH0\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Signup",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": []
+		},
+		{
+			"name": "Property",
+			"item": [
+				{
+					"name": "Property Documents",
+					"item": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "SERVER_URL",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
