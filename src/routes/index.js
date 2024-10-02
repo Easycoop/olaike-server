@@ -13,6 +13,7 @@ const { router: notificationRoute } = require('./notification.routes');
 const { router: beneficiaryRoute } = require('./beneficiary.routes.js');
 const { router: budgetRoute } = require('./budget.routes');
 const { router: paymentRoute } = require('./payment.routes');
+const { router: applicationRoute } = require('./application.routes');
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router
     .use('/beneficiary', beneficiaryRoute)
     .use('/payment', paymentRoute)
     .use('/budget', budgetRoute)
+    .use('/application', applicationRoute)
     .use('/misc', miscRoute);
 
 module.exports = { routeHandler: router };
