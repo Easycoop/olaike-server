@@ -1,6 +1,7 @@
 const db = require('../../database/models/index');
 const User = db.User;
 const Password = db.Password;
+const Group = db.Group;
 const UserApplication = db.UserApplication;
 const { BadRequestError, InternalServerError } = require('../../utils/error');
 const path = require('path');
@@ -15,6 +16,10 @@ class UserApplicationsController {
     static async newUserApplication(req, res) {
         await sequelize.transaction(async (t) => {
             const { firstName, lastName, email, password, phone, group } = req.body;
+            console.log('benny', req.body);
+            if (!firstName || !lastName || !email || !password || !phone || !group) {
+                throw new BadRequestError('Missing required fields');
+            }
 
             try {
                 const newApplication = await UserApplication.create({
@@ -27,7 +32,7 @@ class UserApplicationsController {
                     status: 'pending',
                 });
 
-                LogService.createLog('AUTH', null, 'user', 'new user registration');
+                LogService.createLog('SERVICE', null, 'user', 'new user registration');
                 AuthMailService.sendRegistrationComplete({ email, firstName, lastName });
 
                 res.status(200).send({
@@ -73,7 +78,7 @@ class UserApplicationsController {
         });
     }
     static async updateUserApplication(req, res) {
-        const { id, action, firstName, lastName, email, password } = req.body;
+        const { id, action, firstName, lastName, email, password, group } = req.body;
         await sequelize.transaction(async (t) => {
             if (action == 'accept') {
                 await UserApplication.update(
@@ -87,7 +92,7 @@ class UserApplicationsController {
 
                 // Create new user
                 try {
-                    await UserService.createUser(id, action, firstName, lastName, email, password);
+                    await UserService.createUser(id, action, firstName, lastName, email, password, group);
 
                     LogService.createLog('AUTH', null, 'user', 'user registration accepted');
 
@@ -157,13 +162,12 @@ class UserApplicationsController {
 
     static async getAllUserApplicationsByGroups(req, res, next) {
         await sequelize.transaction(async (t) => {
-            const group = req.params.group;
+            const groupId = req.authPayload.user.groupId;
+
             const page = req.query.page ? Number(req.query.page) : 1;
             const size = req.query.size ? Number(req.query.size) : 10;
 
             if (page < 1 || size < 0) return next(new BadRequestError('Invalid pagination parameters'));
-
-            if (!group) return next(new BadRequestError('group id not specified'));
 
             let limit = null;
             let offset = null;
@@ -172,9 +176,27 @@ class UserApplicationsController {
                 ({ limit, offset } = getPagination(page, size));
             }
 
+            const masterGroup = await Group.findOne({
+                where: {
+                    id: 'master',
+                },
+            });
+
             let userApplications;
 
-            if ((group = 'master')) {
+            if (groupId == masterGroup.id) {
+                userApplications = await UserApplication.findAndCountAll(
+                    {
+                        where: {
+                            groupId,
+                        },
+                        order: [['createdAt', 'DESC']],
+                        limit,
+                        offset,
+                    },
+                    { transaction: t },
+                );
+            } else {
                 userApplications = await UserApplication.findAndCountAll(
                     {
                         where: {},
@@ -185,18 +207,6 @@ class UserApplicationsController {
                     { transaction: t },
                 );
             }
-
-            userApplications = await UserApplication.findAndCountAll(
-                {
-                    where: {
-                        group,
-                    },
-                    order: [['createdAt', 'DESC']],
-                    limit,
-                    offset,
-                },
-                { transaction: t },
-            );
 
             const specificCount = userApplications.rows.length;
 

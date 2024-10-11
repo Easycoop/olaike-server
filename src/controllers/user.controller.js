@@ -2,7 +2,9 @@ const db = require('../database/models/index');
 const User = db.User;
 const Role = db.Role;
 const Password = db.Password;
+const Group = db.Group;
 const { BadRequestError, InternalServerError, NotFoundError } = require('../utils/error');
+const { getPagination } = require('../utils/pagination');
 
 async function validateCreateUser({ email }) {
     const existingUser = await User.findOne({ where: { email: email } });
@@ -62,6 +64,65 @@ class UserController {
         } catch (error) {
             next(error);
         }
+    }
+
+    // Get all users
+    static async getAllUsersByGroups(req, res, next) {
+        const groupId = req.authPayload.user.groupId;
+        const page = req.query.page ? Number(req.query.page) : 1;
+        const size = req.query.size ? Number(req.query.size) : 10;
+
+        if (page < 1 || size < 0) return next(new BadRequestError('Invalid pagination parameters'));
+
+        let limit = null;
+        let offset = null;
+
+        if (page && size) {
+            ({ limit, offset } = getPagination(page, size));
+        }
+
+        const masterGroup = await Group.findOne({
+            where: {
+                id: 'master',
+            },
+        });
+
+        let users;
+
+        if (groupId == masterGroup.id) {
+            users = await User.findAndCountAll(
+                {
+                    where: {
+                        groupId,
+                    },
+                    order: [['createdAt', 'DESC']],
+                    limit,
+                    offset,
+                },
+                { transaction: t },
+            );
+        } else {
+            users = await User.findAndCountAll(
+                {
+                    where: {},
+                    order: [['createdAt', 'DESC']],
+                    limit,
+                    offset,
+                },
+                { transaction: t },
+            );
+        }
+
+        const specificCount = users.rows.length;
+
+        if (specificCount === 0) return next(new NotFoundError('No user applications found'));
+
+        const response = getPagingData(users, page, limit, 'result');
+
+        if (response.totalPages === null) {
+            response.totalPages = 1;
+        }
+        return res.status(200).json({ success: true, data: response });
     }
 
     // Create a new user

@@ -31,9 +31,9 @@ class AuthValidator {
             throw new BadRequestError('Your account has not been activated');
         }
 
-        if (!user.isVerified) {
-            throw new BadRequestError('Your account has not been verified');
-        }
+        // if (!user.isVerified) {
+        //     throw new BadRequestError('Your account has not been verified');
+        // }
 
         const userPassword = await Password.findOne({ where: { userId: user.id } });
         if (!userPassword) {

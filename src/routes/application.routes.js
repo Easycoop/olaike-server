@@ -5,6 +5,7 @@ const UserApplicationsController = require('../controllers/applications/user.app
 router
     .post('/user-application', UserApplicationsController.newUserApplication)
     .get('/', UserApplicationsController.getAllUserApplications)
+    .get('/group', UserApplicationsController.getAllUserApplicationsByGroups)
     .get('/user/:applicationId', UserApplicationsController.getSingleUserApplication)
     .post('/update', UserApplicationsController.updateUserApplication);
 

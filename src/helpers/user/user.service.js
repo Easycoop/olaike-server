@@ -3,7 +3,8 @@ const { BadRequestError } = require('../../utils/error');
 const { sequelize } = require('../../database/models/index.js');
 
 class UserService {
-    static async createUser(id, action, firstName, lastName, email, password) {
+    static async createUser(id, action, firstName, lastName, email, password, group) {
+        console.log('james', group);
         const t = await sequelize.transaction(); // Start a transaction
         try {
             const existingUser = await User.findOne({ where: { email: email } });
@@ -16,6 +17,7 @@ class UserService {
                     firstName: firstName,
                     lastName: lastName,
                     email: email,
+                    groupId: group,
                 },
                 { transaction: t },
             );

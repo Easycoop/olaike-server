@@ -66,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
                 },
             },
             group: {
-                type: DataTypes.STRING,
+                type: DataTypes.UUID,
                 allowNull: false,
             },
             password: {

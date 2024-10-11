@@ -1,5 +1,6 @@
 // group.controller.js
 const db = require('../database/models/index');
+const LogService = require('../helpers/logs/logs.service');
 const Group = db.Group;
 const User = db.User;
 const Wallet = db.Wallet;
@@ -12,13 +13,12 @@ class GroupController {
         const t = await db.sequelize.transaction();
 
         if (!name || !description) {
-            return next(new BadRequestError('name and description are required'));
+            return next(new BadRequestError('name and description is required'));
         }
 
         const newGroup = await Group.create({ name, description }, { transaction: t });
 
         // Create wallet for the new society
-
         const newWallet = await Wallet.create(
             {
                 groupId: newGroup.id,
@@ -29,6 +29,8 @@ class GroupController {
         );
 
         await t.commit();
+
+        LogService.createLog('SERVICE', null, 'system', 'new society created');
 
         res.status(201).json({
             status: 'success',

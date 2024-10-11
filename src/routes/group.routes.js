@@ -6,10 +6,16 @@ const { checkRoles } = require('../middlewares/role.permission');
 const { AuthTokenType } = require('../utils/token');
 const GroupController = require('../controllers/group.controller');
 
-router.get('/groups', verifyAuth(AuthTokenType.Access), GroupController.getAllGroups).post(
-    '/',
-    // verifyAuth(AuthTokenType.Access),
-    GroupController.createGroup,
-);
+router
+    .get(
+        '/',
+        // verifyAuth(AuthTokenType.Access),
+        GroupController.getAllGroups,
+    )
+    .post(
+        '/',
+        // verifyAuth(AuthTokenType.Access),
+        GroupController.createGroup,
+    );
 
 module.exports = { router };
