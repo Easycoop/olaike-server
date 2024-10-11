@@ -2,7 +2,7 @@ const { Logs } = require('../../database/models/index');
 
 class LogService {
     static async createLog(
-        action,
+        action = 'SYSTEM',
         userId = null,
         type = 'system',
         description = 'log for specified action',

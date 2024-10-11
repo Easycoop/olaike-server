@@ -3,14 +3,32 @@ const db = require('../database/models/index');
 const Group = db.Group;
 const User = db.User;
 const Wallet = db.Wallet;
-const { NotFoundError, InternalServerError } = require('../utils/error');
+const { NotFoundError, InternalServerError, BadRequestError } = require('../utils/error');
 
 class GroupController {
     // Create a new group
     static async createGroup(req, res, next) {
         const { name, description, type } = req.body;
+        const t = await db.sequelize.transaction();
 
-        const newGroup = await Group.create({ name, description, type });
+        if (!name || !description) {
+            return next(new BadRequestError('name and description are required'));
+        }
+
+        const newGroup = await Group.create({ name, description }, { transaction: t });
+
+        // Create wallet for the new society
+
+        const newWallet = await Wallet.create(
+            {
+                groupId: newGroup.id,
+                balance: 0,
+                currency: 'NGN',
+            },
+            { transaction: t },
+        );
+
+        await t.commit();
 
         res.status(201).json({
             status: 'success',

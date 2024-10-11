@@ -9,12 +9,13 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             name: {
-                type: DataTypes.DECIMAL(10, 2),
+                type: DataTypes.STRING,
                 defaultValue: 0,
                 allowNull: false,
             },
             description: {
                 type: DataTypes.STRING,
+                allowNull: true,
             },
             type: {
                 type: DataTypes.ENUM('typeA', 'typeB'),
@@ -22,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             isActive: {
                 type: DataTypes.BOOLEAN,
-                defaultValue: false,
+                defaultValue: true,
             },
         },
         {

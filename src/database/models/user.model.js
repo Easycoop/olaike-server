@@ -70,6 +70,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             phone: {
                 type: DataTypes.BIGINT,
+                allowNull: true,
                 unique: true,
                 validate: {
                     len: {

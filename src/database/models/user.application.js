@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             email: {
                 type: DataTypes.STRING,
-                unique: true,
+                unique: false,
                 validate: {
                     isEmail: true,
                     notNull: {
@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             phone: {
                 type: DataTypes.BIGINT,
-                unique: true,
+                unique: false,
                 validate: {
                     len: {
                         args: [10, 15],
@@ -64,6 +64,14 @@ module.exports = (sequelize, DataTypes) => {
                         msg: 'Please enter a valid numeric Phone number!',
                     },
                 },
+            },
+            group: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
+            password: {
+                type: DataTypes.STRING,
+                allowNull: false,
             },
             isVerified: {
                 type: DataTypes.BOOLEAN,
@@ -89,7 +97,7 @@ module.exports = (sequelize, DataTypes) => {
             },
         },
         {
-            tableName: 'user_application',
+            tableName: 'user_applications',
             paranoid: true,
             underscored: true,
             timestamps: true,
