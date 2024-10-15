@@ -7,5 +7,6 @@ const { AuthTokenType } = require('../utils/token');
 const WalletController = require('../controllers/wallet.controlller');
 
 router.get('/wallets', verifyAuth(AuthTokenType.Access), WalletController.getAllWallets);
+router.get('/:id', verifyAuth(AuthTokenType.Access), WalletController.getWallet);
 
 module.exports = { router };

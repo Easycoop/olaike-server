@@ -8,23 +8,24 @@ class RolePermissions {
     static async createRole(req, res) {
         const { name } = req.body;
 
-        try {
-            const existingRole = await Role.findOne({ where: { name: name } });
+        const existingRole = await Role.findOne({ where: { name: name } });
 
-            if (existingRole) {
-                res.status(400).json({ message: 'Role with the same name already exists' });
-            }
-            const role = await Role.create({ name });
-            res.status(201).json(role);
-        } catch (error) {
-            throw new InternalServerError('Error creating role', error);
+        if (existingRole) {
+            return res.status(201).json({ message: 'Role with the same name already exists' });
+
+            // throw new BadRequestError('Role with the same name already exists');
         }
+        const role = await Role.create({
+            name: name,
+        });
+
+        res.status(201).json({ status: 'success', data: { role: role } });
     }
 
     static async getRoles(req, res) {
         try {
             const roles = await Role.findAll();
-            res.status(200).json(roles);
+            res.status(200).json({ status: 'success', data: { roles: roles } });
         } catch (error) {
             res.status(500).json({ message: 'Error fetching roles', error });
         }

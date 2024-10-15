@@ -28,6 +28,9 @@ class GroupController {
             { transaction: t },
         );
 
+        await newGroup.update({ walletId: newWallet.id });
+        await newGroup.save();
+
         await t.commit();
 
         LogService.createLog('SERVICE', null, 'system', 'new society created');

@@ -4,6 +4,7 @@ const { UnauthenticatedError } = require('../utils/error');
 const verifyAuth = (requiredAuthType) => {
     return async (req, res, next) => {
         const authHeader = req.headers.authorization;
+
         if (!authHeader || !authHeader.startsWith('Bearer')) {
             return next(new UnauthenticatedError('Invalid authorization header'));
         }
@@ -39,10 +40,13 @@ const verifyAuth = (requiredAuthType) => {
 
 const verifyRefreshAuth = (requiredAuthType) => {
     return async (req, res, next) => {
-        const cookies = req.cookies.refreshToken;
-        const jwtToken = cookies;
+        // const cookies = req.cookies.refreshToken;
+        // const jwtToken = cookies;
+        // if (!cookies) return next(new UnauthenticatedError('Refresh token not found in cookie'));
 
-        if (!cookies) return next(new UnauthenticatedError('Refresh token not found in cookie'));
+        const refreshToken = req.body.refreshToken;
+        const jwtToken = refreshToken;
+        if (!refreshToken) return next(new UnauthenticatedError('Refresh token is required'));
 
         const payload = await AuthTokenCipher.decodeToken(jwtToken);
         const tokenData = payload;

@@ -45,7 +45,7 @@ class WalletController {
 
     // Get a user's wallet
     static async getWallet(req, res, next) {
-        const userId = req.params.userId;
+        const userId = req.params.id;
 
         try {
             const wallet = await Wallet.findOne({ where: { userId } });

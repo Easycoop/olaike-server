@@ -3,8 +3,9 @@ const User = db.User;
 const Role = db.Role;
 const Password = db.Password;
 const Group = db.Group;
+const Wallet = db.Wallet;
 const { BadRequestError, InternalServerError, NotFoundError } = require('../utils/error');
-const { getPagination } = require('../utils/pagination');
+const { getPagination, getPagingData } = require('../utils/pagination');
 
 async function validateCreateUser({ email }) {
     const existingUser = await User.findOne({ where: { email: email } });
@@ -71,7 +72,6 @@ class UserController {
         const groupId = req.authPayload.user.groupId;
         const page = req.query.page ? Number(req.query.page) : 1;
         const size = req.query.size ? Number(req.query.size) : 10;
-
         if (page < 1 || size < 0) return next(new BadRequestError('Invalid pagination parameters'));
 
         let limit = null;
@@ -83,34 +83,32 @@ class UserController {
 
         const masterGroup = await Group.findOne({
             where: {
-                id: 'master',
+                name: 'master',
             },
         });
 
+        if (!masterGroup) {
+            throw new InternalServerError('Internal server error');
+        }
         let users;
 
         if (groupId == masterGroup.id) {
-            users = await User.findAndCountAll(
-                {
-                    where: {
-                        groupId,
-                    },
-                    order: [['createdAt', 'DESC']],
-                    limit,
-                    offset,
-                },
-                { transaction: t },
-            );
+            users = await User.findAndCountAll({
+                where: {},
+                order: [['createdAt', 'DESC']],
+                limit,
+                offset,
+            });
         } else {
-            users = await User.findAndCountAll(
-                {
-                    where: {},
-                    order: [['createdAt', 'DESC']],
-                    limit,
-                    offset,
+            users = await User.findAndCountAll({
+                groupId,
+                where: {
+                    groupId,
                 },
-                { transaction: t },
-            );
+                order: [['createdAt', 'DESC']],
+                limit,
+                offset,
+            });
         }
 
         const specificCount = users.rows.length;
@@ -127,8 +125,9 @@ class UserController {
 
     // Create a new user
     static async createUser(req, res, next) {
-        const { firstName, lastName, email, password, phone, role } = req.body;
-        const t = await sequelize.transaction();
+        const { firstName, lastName, email, password, phone, role, country, isActivated, gender, state, group } =
+            req.body;
+        const t = await db.sequelize.transaction();
 
         try {
             // Validate user data
@@ -137,16 +136,21 @@ class UserController {
             // Create new user
             const newUser = await User.create(
                 {
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    phone: phone,
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    country,
+                    isActivated,
+                    gender,
+                    state,
+                    groupId: group,
                 },
                 { transaction: t },
             );
 
             // Find the EndUser role
-            const userRole = await Role.findOne({ where: { name: `${role}` }, transaction: t });
+            const userRole = await Role.findOne({ where: { id: `${role}` }, transaction: t });
             if (!userRole) {
                 throw new Error('role not found');
             }
@@ -159,6 +163,16 @@ class UserController {
                 {
                     userId: newUser.id,
                     password: password,
+                },
+                { transaction: t },
+            );
+
+            // Create wallet for the new user
+            const newWallet = await Wallet.create(
+                {
+                    userId: newUser.id,
+                    balance: 0,
+                    currency: 'NGN',
                 },
                 { transaction: t },
             );

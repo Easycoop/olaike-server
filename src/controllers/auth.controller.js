@@ -128,12 +128,12 @@ class AuthController {
                 expiry: 7 * 24 * 60 * 60, // 7 days
             });
 
-            // Set refresh token as HTTP-only cookie
-            res.cookie('refreshToken', refreshToken, {
-                httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                secure: true, // Enable in production with HTTPS
-            });
+            // // Set refresh token as HTTP-only cookie
+            // res.cookie('refreshToken', refreshToken, {
+            //     httpOnly: true,
+            //     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            //     secure: true, // Enable in production with HTTPS
+            // });
 
             // Send response
             res.status(200).json({
@@ -144,7 +144,7 @@ class AuthController {
                     roles: userRoles,
                     permissions: allPermissions,
                     accessToken,
-                    // refreshToken, // Optional to return
+                    refreshToken, // Return refresh token in data
                 },
             });
         } catch (error) {

@@ -8,10 +8,10 @@ const UserController = require('../controllers/user.controller');
 
 router
     .get('/', UserController.getAllUsers)
-    .get('/group', UserController.getAllUsersByGroups)
+    .get('/group', verifyAuth(AuthTokenType.Access), UserController.getAllUsersByGroups)
     .get('/user', verifyAuth(AuthTokenType.Access), UserController.getLoggedInUser)
     .get('/user/:id', verifyAuth(AuthTokenType.Access), UserController.getUser)
     .delete('/user/:id', verifyAuth(AuthTokenType.Access), checkRoles('admin'), UserController.deleteUser)
-    .post('user', verifyAuth(AuthTokenType.Access), checkRoles('admin'), UserController.createUser);
+    .post('/', verifyAuth(AuthTokenType.Access), UserController.createUser);
 
 module.exports = { router };
