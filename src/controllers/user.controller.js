@@ -191,25 +191,76 @@ class UserController {
 
     // Update user information
     static async updateUser(req, res, next) {
-        try {
-            const userId = req.params.id;
-            const { firstName, lastName, email, phone } = req.body;
+        const t = await db.sequelize.transaction();
+        const { firstName, lastName, email, password, role, phone, country, state, address, gender, isVerified, id } =
+            req.body;
+        console.log('genevieve', req.body);
 
-            const user = await User.findOne({ where: { id: userId } });
+        // Initialize an empty object to hold the fields to be updated
+        const updateFields = {};
 
-            if (!user) {
-                throw new NotFoundError(`User with id ${userId} not found`);
+        // Check each field and add it to the updateFields object if it exists
+        if (firstName) {
+            updateFields.firstName = firstName;
+        }
+        if (lastName) {
+            updateFields.lastName = lastName;
+        }
+        if (email) {
+            updateFields.email = email;
+        }
+        if (phone) {
+            updateFields.phone = phone;
+        }
+        if (country) {
+            updateFields.country = country;
+        }
+        if (state) {
+            updateFields.state = state;
+        }
+        if (address) {
+            updateFields.address = address;
+        }
+        if (gender) {
+            updateFields.gender = gender;
+        }
+
+        if (isVerified) {
+            updateFields.isVerified = isVerified;
+        }
+
+        console.log('field', updateFields);
+        if (role) {
+            const user = await User.findOne({ where: { id: id } });
+            // Find the EndUser role
+            const userRole = await Role.findOne({ where: { id: role } });
+
+            if (!userRole) {
+                throw new Error('role not found');
             }
 
-            await user.update({ firstName, lastName, email, phone });
-
-            res.status(200).json({
-                status: 'success',
-                data: { user },
-            });
-        } catch (error) {
-            next(error);
+            // Assign role to the new user
+            await user.addRole(userRole, { transaction: t });
         }
+
+        // Perform the update only if there are fields to be updated
+        if (Object.keys(updateFields).length > 0) {
+            await User.update(
+                updateFields, // Pass the dynamic updateFields object here
+                {
+                    where: {
+                        id: id,
+                    },
+                },
+                { transaction: t },
+            );
+        }
+
+        return res.status(200).send({
+            status: 'success',
+            message: 'User update successful',
+            data: null,
+        });
     }
 
     // Delete a single user
