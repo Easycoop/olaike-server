@@ -1,11 +1,13 @@
-const { User, Role, Password, Permission, Wallet } = require('../../database/models/index');
+const { User, Role, Password, Permission, Wallet, SubWallet } = require('../../database/models/index');
 const { BadRequestError } = require('../../utils/error');
 const { sequelize } = require('../../database/models/index.js');
 
 class UserService {
-    static async createUser(id, action, firstName, lastName, email, password, group) {
-        console.log('james', group);
+    static async createUser(id, action, firstName, lastName, email, password, group, gender) {
         const t = await sequelize.transaction(); // Start a transaction
+        // Generate a random referral string(8 digits)
+        const referralCode = Math.floor(10000000 + Math.random() * 90000000).toString(); // 8 digit referral code
+
         try {
             const existingUser = await User.findOne({ where: { email: email } });
             if (existingUser) {
@@ -17,7 +19,9 @@ class UserService {
                     firstName: firstName,
                     lastName: lastName,
                     email: email,
+                    gender: gender,
                     groupId: group,
+                    referralCode: referralCode,
                 },
                 { transaction: t },
             );
@@ -58,6 +62,43 @@ class UserService {
                     userId: newUser.id,
                     balance: 0,
                     currency: 'NGN',
+                },
+                { transaction: t },
+            );
+
+            // Create subwallet1 for the new user
+
+            const subWallet1 = await SubWallet.create(
+                {
+                    walletId: newWallet.id,
+                    balance: 0,
+                    currency: 'NGN',
+                    type: 'typeA',
+                    name: 'Savings Wallet',
+                },
+                { transaction: t },
+            );
+
+            // Create subwallet2 for the new user
+            const subWallet2 = await SubWallet.create(
+                {
+                    walletId: newWallet.id,
+                    balance: 0,
+                    currency: 'NGN',
+                    type: 'typeB',
+                    name: 'Home Savings Wallet',
+                },
+                { transaction: t },
+            );
+
+            // Create subwallet3 for the new user
+            const subWallet3 = await SubWallet.create(
+                {
+                    walletId: newWallet.id,
+                    balance: 0,
+                    currency: 'NGN',
+                    type: 'typeC',
+                    name: 'Holiday Wallet',
                 },
                 { transaction: t },
             );

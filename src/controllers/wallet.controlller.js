@@ -1,5 +1,4 @@
-const db = require('../database/models/index');
-const Wallet = db.Wallet; // Assuming Wallet is a Sequelize model
+const { Wallet, SubWallet } = require('../database/models/index');
 const { BadRequestError, NotFoundError, InternalServerError } = require('../utils/error');
 
 class WalletController {
@@ -48,7 +47,7 @@ class WalletController {
         const userId = req.params.id;
 
         try {
-            const wallet = await Wallet.findOne({ where: { userId } });
+            const wallet = await Wallet.findOne({ where: { userId: userId } });
 
             if (!wallet) {
                 throw new NotFoundError(`Wallet not found for user with id ${userId}`);
@@ -61,6 +60,30 @@ class WalletController {
         } catch (error) {
             next(error);
         }
+    }
+
+    // Get a user's wallets including subwallets
+    static async getUserWallets(req, res, next) {
+        const userId = req.params.userId;
+
+        const wallet = await Wallet.findOne({ where: { userId: userId } });
+
+        if (!wallet) {
+            throw new NotFoundError(`Wallet not found for user with id ${userId}`);
+        }
+
+        const subWallets = await SubWallet.findAll({
+            where: { walletId: wallet.id },
+        });
+
+        if (!subWallets) {
+            throw new NotFoundError(`Wallet not found for user with id ${userId}`);
+        }
+
+        res.status(200).json({
+            status: 'success',
+            data: { wallet: wallet, subWallets: subWallets },
+        });
     }
 
     // Update wallet balance

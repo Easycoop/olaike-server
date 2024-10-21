@@ -5,18 +5,20 @@ const Group = db.Group;
 const User = db.User;
 const Wallet = db.Wallet;
 const { NotFoundError, InternalServerError, BadRequestError } = require('../utils/error');
+const Op = require('sequelize').Op;
 
 class GroupController {
     // Create a new group
     static async createGroup(req, res, next) {
-        const { name, description, type } = req.body;
+        const { name, description, entranceFee, type } = req.body;
+
         const t = await db.sequelize.transaction();
 
         if (!name || !description) {
             return next(new BadRequestError('name and description is required'));
         }
 
-        const newGroup = await Group.create({ name, description }, { transaction: t });
+        const newGroup = await Group.create({ name, description, entranceFee }, { transaction: t });
 
         // Create wallet for the new society
         const newWallet = await Wallet.create(
@@ -44,7 +46,7 @@ class GroupController {
     // Update an existing group
     static async updateGroup(req, res, next) {
         const { groupId } = req.params;
-        const { name, description, type, isActive } = req.body;
+        const { name, description, type, isActive, entranceFee } = req.body;
 
         const group = await Group.findOne({ where: { id: groupId } });
 
@@ -52,7 +54,7 @@ class GroupController {
             throw new NotFoundError(`Group with id ${groupId} not found`);
         }
 
-        await group.update({ name, description, type, isActive });
+        await group.update({ name, description, type, isActive, entranceFee });
 
         res.status(200).json({
             status: 'success',
@@ -172,6 +174,20 @@ class GroupController {
         });
     }
 
+    // Get group
+    static async getGroup(req, res, next) {
+        const groupId = req.params.groupId;
+        if (!groupId) throw new BadRequestError('Invalid group id');
+
+        const group = await Group.findOne({ where: { id: groupId } });
+
+        if (!group) throw new InternalServerError(`Group with ID: ${groupId} not found`);
+        res.status(200).json({
+            status: 'success',
+            data: group,
+        });
+    }
+
     // Get all groups
     static async getAllGroups(req, res, next) {
         const groups = await Group.findAll();
@@ -179,6 +195,26 @@ class GroupController {
             status: 'success',
             data: { groups },
         });
+    }
+
+    // Get all groups beside master
+    static async getAllGroupsBesideMasters(req, res, next) {
+        try {
+            const groups = await Group.findAll({
+                where: {
+                    name: {
+                        [Op.ne]: 'master', // Exclude group with name 'master'
+                    },
+                },
+            });
+
+            res.status(200).json({
+                status: 'success',
+                data: { groups },
+            });
+        } catch (error) {
+            next(error); // Handle any errors
+        }
     }
 }
 

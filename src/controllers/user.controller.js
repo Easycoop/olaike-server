@@ -101,7 +101,6 @@ class UserController {
             });
         } else {
             users = await User.findAndCountAll({
-                groupId,
                 where: {
                     groupId,
                 },
@@ -194,7 +193,6 @@ class UserController {
         const t = await db.sequelize.transaction();
         const { firstName, lastName, email, password, role, phone, country, state, address, gender, isVerified, id } =
             req.body;
-        console.log('genevieve', req.body);
 
         // Initialize an empty object to hold the fields to be updated
         const updateFields = {};
@@ -229,7 +227,6 @@ class UserController {
             updateFields.isVerified = isVerified;
         }
 
-        console.log('field', updateFields);
         if (role) {
             const user = await User.findOne({ where: { id: id } });
             // Find the EndUser role

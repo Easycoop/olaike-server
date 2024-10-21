@@ -9,7 +9,7 @@ const get = request.get;
  */
 class Transaction {
     static async Initialize(transactionData) {
-        if (!transactionData?.email || !transactionData?.plan) {
+        if (!transactionData?.email || !transactionData?.amount) {
             return null;
         }
 

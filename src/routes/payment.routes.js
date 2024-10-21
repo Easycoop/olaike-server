@@ -18,6 +18,11 @@ router
         verifyAuth(AuthTokenType.Access),
         AuthenticatedController(TransactionController.verifyTransaction),
     )
+    .get(
+        '/verify-fund/:reference',
+        verifyAuth(AuthTokenType.Access),
+        AuthenticatedController(TransactionController.verifyTransactionFund),
+    )
     .post(
         '/create-subscription-plan',
         verifyAuth(AuthTokenType.Access),

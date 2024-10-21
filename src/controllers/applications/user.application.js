@@ -15,8 +15,10 @@ const NotificationService = require('../../helpers/notification/notification.ser
 class UserApplicationsController {
     static async newUserApplication(req, res) {
         await sequelize.transaction(async (t) => {
-            const { firstName, lastName, email, password, phone, group } = req.body;
-            console.log('benny', req.body);
+            const { firstName, lastName, email, password, phone, group, gender, referralCode } = req.body;
+
+            let _referralCode = null;
+            if (referralCode) _referralCode = referralCode;
             if (!firstName || !lastName || !email || !password || !phone || !group) {
                 throw new BadRequestError('Missing required fields');
             }
@@ -27,8 +29,10 @@ class UserApplicationsController {
                     lastName,
                     email,
                     password,
+                    gender,
                     phone,
                     group,
+                    referralCode: _referralCode,
                     status: 'pending',
                 });
 
@@ -78,7 +82,7 @@ class UserApplicationsController {
         });
     }
     static async updateUserApplication(req, res) {
-        const { id, action, firstName, lastName, email, password, group } = req.body;
+        const { id, action, firstName, lastName, email, password, group, gender } = req.body;
         await sequelize.transaction(async (t) => {
             if (action == 'accept') {
                 await UserApplication.update(
@@ -92,7 +96,7 @@ class UserApplicationsController {
 
                 // Create new user
                 try {
-                    await UserService.createUser(id, action, firstName, lastName, email, password, group);
+                    await UserService.createUser(id, action, firstName, lastName, email, password, group, gender);
 
                     LogService.createLog('AUTH', null, 'user', 'user registration accepted');
 

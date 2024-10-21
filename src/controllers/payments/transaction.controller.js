@@ -18,25 +18,25 @@ class TransactionController {
         const { email, amount, currency, paymentMethod, description } = req.body;
 
         try {
-            if (!paymentMethods.includes(paymentMethod)) {
-                throw new InternalServerError('payment method not accepted');
-            }
+            // if (!paymentMethods.includes(paymentMethod)) {
+            //     throw new InternalServerError('payment method not accepted');
+            // }
 
             const user = await User.findOne({ where: { email: email } });
             if (!user) {
                 throw new BadRequestError('User with the email not found');
             }
-
             const wallet = await Wallet.findOne({ where: { userId: user.id } });
-            if (!user) {
-                throw new InternalServerError('User with the email not found');
+            if (!wallet) {
+                throw new InternalServerError('Wallet with the email not found');
             }
 
-            const newTransaction = await Transaction.Create({
+            const newTransaction = await Transaction.create({
                 currency: currency,
                 amount: amount,
                 description: description,
-                walletid: wallet.id,
+                walletId: wallet.id,
+                groupId: user.groupId,
                 status: 'pending',
                 metaData: {
                     from: {
@@ -56,32 +56,29 @@ class TransactionController {
             const paymentData = {
                 email,
                 amount: amount * 100, // Convert to kobo
-                channel: paymentMethod,
-                callback_url: 'https://your-domain.com/payment/callback',
+                // channel: paymentMethod,
+                // callback_url: 'https://your-domain.com/payment/callback',
             };
 
             const data = await Paystack.Transaction.Initialize(paymentData);
 
             if (!data?.status || !data?.data) {
-                res.status(201).json({
+                return res.status(201).json({
                     status: 'failed',
                     message: 'transaction initiation failed',
                     data: null,
                 });
             }
 
-            const { access_code, authorization_url } = data.data;
+            const { access_code, reference, authorization_url } = data.data;
             newTransaction.code = access_code;
-            newTransaction.reference = data.reference;
+            newTransaction.reference = reference;
             await newTransaction.save();
-
-            wallet.balance += amount * 100; // Update balance
-            await wallet.save();
 
             res.status(200).json({
                 status: 'success',
                 message: 'Transaction successfully initialized',
-                data: response.data,
+                data: data,
             });
         } catch (error) {
             res.status(500).json({ message: 'Failed to initiate payment', error: error.message });
@@ -89,7 +86,7 @@ class TransactionController {
     }
 
     /**
-     * Handles payment verification
+     * Handles payment verification for donation
      * @param {object} req
      * @param {object} res
      * @returns
@@ -102,9 +99,14 @@ class TransactionController {
                 throw new BadRequestError('Payment reference required');
             }
 
-            const transaction = Transaction.findOne({ where: { reference: reference } });
+            const transaction = await Transaction.findOne({ where: { reference: reference } });
             if (!transaction) {
                 throw new InternalServerError('Payment not valid');
+            }
+
+            const wallet = await Wallet.findOne({ where: { groupId: transaction.groupId } });
+            if (!wallet) {
+                throw new InternalServerError('Wallet not found');
             }
 
             const { status, data } = await Paystack.Transaction.Verify(reference);
@@ -131,6 +133,15 @@ class TransactionController {
                 return;
             }
 
+            if (transaction.amount != data.amount / 100) {
+                transaction.status = 'failed';
+                await transaction.save();
+                return res.status(201).json({
+                    status: 'failed',
+                    message: 'Transaction not verified',
+                });
+            }
+
             transaction.status = 'success';
             await transaction.save();
 
@@ -143,6 +154,90 @@ class TransactionController {
                 method: data.channel,
                 extra: JSON.stringify(data),
             });
+
+            await wallet.increment('balance', { by: transaction.amount });
+
+            res.status(201).json({
+                status: 'success',
+                message: 'Transaction verified',
+                data: newPayment.total,
+            });
+        } catch (error) {
+            res.status(500).json({ message: 'Transaction verification failed', error: error.message });
+        }
+    }
+
+    /**
+     * Handles payment verification for funding
+     * @param {object} req
+     * @param {object} res
+     * @returns
+     */
+    static async verifyTransactionFund(req, res) {
+        const { reference } = req.params;
+
+        try {
+            if (!reference) {
+                throw new BadRequestError('Payment reference required');
+            }
+
+            const transaction = await Transaction.findOne({ where: { reference: reference } });
+            if (!transaction) {
+                throw new InternalServerError('Payment not valid');
+            }
+
+            const wallet = await Wallet.findOne({ where: { id: transaction.walletId } });
+            if (!wallet) {
+                throw new InternalServerError('Wallet not found');
+            }
+
+            const { status, data } = await Paystack.Transaction.Verify(reference);
+
+            if (status && data.status === 'failed') {
+                transaction.status = 'failed';
+                await transaction.save();
+
+                const newPayment = Payment.create({
+                    transactionid: transaction.id,
+                    gateway: 'paystack',
+                    total: data.amount,
+                    status: 'failed',
+                    currency: data.currency,
+                    method: data.channel,
+                    extra: JSON.stringify(data),
+                });
+
+                res.status(201).json({
+                    status: 'failed',
+                    message: 'payment not successful',
+                    data: newPayment.total,
+                });
+                return;
+            }
+
+            if (transaction.amount != data.amount / 100) {
+                transaction.status = 'failed';
+                await transaction.save();
+                return res.status(201).json({
+                    status: 'failed',
+                    message: 'Transaction not verified',
+                });
+            }
+
+            transaction.status = 'success';
+            await transaction.save();
+
+            const newPayment = Payment.create({
+                transactionid: transaction.id,
+                gateway: 'paystack',
+                total: data.amount,
+                status: 'sucess',
+                currency: data.currency,
+                method: data.channel,
+                extra: JSON.stringify(data),
+            });
+
+            await wallet.increment('balance', { by: transaction.amount });
 
             res.status(201).json({
                 status: 'success',

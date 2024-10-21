@@ -1,35 +1,47 @@
+const axios = require('axios');
+
 /*  
-    paystack keys
+    Paystack keys
 */
 const paystack_base_url = process.env.PAYSTACK_BASE_URL;
 const paystack_secret_key = process.env.PAYSTACK_SECRET_KEY;
 
 /*
-    make a post request 
+    Make a POST request 
     with preset values
 */
 const post = async (path, postData) => {
-    const data = await axios.post(`${paystack_base_url}${path}`, postData, {
-        headers: {
-            Authorization: `Bearer ${paystack_secret_key}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    return data;
+    try {
+        const response = await axios.post(`${paystack_base_url}${path}`, postData, {
+            headers: {
+                Authorization: `Bearer ${paystack_secret_key}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error making POST request:', error);
+        throw error; // rethrow or handle accordingly
+    }
 };
 
 /*
-    make a get request 
+    Make a GET request 
     with preset values
 */
 const get = async (path) => {
-    const data = await axios.get(`${paystack_base_url}${path}`, {
-        headers: {
-            Authorization: `Bearer ${paystack_secret_key}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    return data;
+    try {
+        const response = await axios.get(`${paystack_base_url}${path}`, {
+            headers: {
+                Authorization: `Bearer ${paystack_secret_key}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error making GET request:', error);
+        throw error;
+    }
 };
 
 module.exports = {

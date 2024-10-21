@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            code: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             type: {
                 type: DataTypes.ENUM('credit', 'debit'),
                 defaultValue: 'credit',
@@ -85,6 +89,11 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
         });
         Transaction.hasOne(models.Payment, {
+            foreignKey: 'transactionId',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+        Transaction.belongsTo(models.Group, {
             foreignKey: 'transactionId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',

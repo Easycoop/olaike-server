@@ -6,6 +6,10 @@ const { checkRoles } = require('../middlewares/role.permission');
 const { AuthTokenType } = require('../utils/token');
 const GroupController = require('../controllers/group.controller');
 
-router.get('/', GroupController.getAllGroups).post('/', verifyAuth(AuthTokenType.Access), GroupController.createGroup);
+router
+    .get('/', GroupController.getAllGroupsBesideMasters)
+    .get('/single/:groupId', verifyAuth(AuthTokenType.Access), GroupController.getGroup)
+    .post('/', verifyAuth(AuthTokenType.Access), GroupController.createGroup)
+    .put('/', verifyAuth(AuthTokenType.Access), GroupController.updateGroup);
 
 module.exports = { router };

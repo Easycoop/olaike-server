@@ -1,7 +1,9 @@
 const db = require('../database/models/index');
-const Transaction = db.Transaction; // Assuming Transaction is a Sequelize model
-const Wallet = db.Wallet; // Assuming Wallet is a Sequelize model
+const Transaction = db.Transaction;
+const Wallet = db.Wallet;
+const Group = db.Group;
 const { BadRequestError, NotFoundError, InternalServerError } = require('../utils/error');
+const { getPagingData, getPagination } = require('../utils/pagination');
 
 class TransactionController {
     // Create a new transaction
@@ -59,6 +61,61 @@ class TransactionController {
         }
     }
 
+    // Get all transactions by groups
+    static async getAllTransactionsByGroups(req, res, next) {
+        const groupId = req.authPayload.user.groupId;
+        const page = req.query.page ? Number(req.query.page) : 1;
+        const size = req.query.size ? Number(req.query.size) : 10;
+        if (page < 1 || size < 0) return next(new BadRequestError('Invalid pagination parameters'));
+
+        let limit = null;
+        let offset = null;
+
+        if (page && size) {
+            ({ limit, offset } = getPagination(page, size));
+        }
+
+        const masterGroup = await Group.findOne({
+            where: {
+                name: 'master',
+            },
+        });
+
+        if (!masterGroup) {
+            throw new InternalServerError('Internal server error');
+        }
+        let transactions;
+
+        if (groupId == masterGroup.id) {
+            transactions = await Transaction.findAndCountAll({
+                where: {},
+                order: [['createdAt', 'DESC']],
+                limit,
+                offset,
+            });
+        } else {
+            transactions = await Transaction.findAndCountAll({
+                where: {
+                    groupId,
+                },
+                order: [['createdAt', 'DESC']],
+                limit,
+                offset,
+            });
+        }
+
+        const specificCount = transactions.rows.length;
+
+        if (specificCount === 0) return next(new NotFoundError('No transactions found'));
+
+        const response = getPagingData(transactions, page, limit, 'result');
+
+        if (response.totalPages === null) {
+            response.totalPages = 1;
+        }
+        return res.status(200).json({ status: 'success', data: response });
+    }
+
     // Get a transaction by ID
     static async getTransaction(req, res, next) {
         const transactionId = req.params.id;
@@ -82,21 +139,73 @@ class TransactionController {
     // Get all transactions for a wallet
     static async getWalletTransactions(req, res, next) {
         const walletId = req.params.walletId;
+        const page = req.query.page ? Number(req.query.page) : 1;
+        const size = req.query.size ? Number(req.query.size) : 10;
+        if (page < 1 || size < 0) return next(new BadRequestError('Invalid pagination parameters'));
 
-        try {
-            const transactions = await Transaction.findAll({ where: { walletId } });
+        let limit = null;
+        let offset = null;
 
-            if (!transactions.length) {
-                throw new NotFoundError(`No transactions found for wallet with id ${walletId}`);
-            }
-
-            res.status(200).json({
-                status: 'success',
-                data: { transactions },
-            });
-        } catch (error) {
-            next(error);
+        if (page && size) {
+            ({ limit, offset } = getPagination(page, size));
         }
+
+        const transactions = await Transaction.findAndCountAll({
+            where: { walletId },
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset,
+        });
+
+        const specificCount = transactions.rows.length;
+
+        if (specificCount === 0) throw new NotFoundError(`No transactions found for wallet with id ${walletId}`);
+
+        const response = getPagingData(transactions, page, limit, 'result');
+
+        if (response.totalPages === null) {
+            response.totalPages = 1;
+        }
+
+        return res.status(200).json({ status: 'success', data: response });
+    }
+
+    // Get all transactions for a user
+    static async getUserTransactions(req, res, next) {
+        const userId = req.params.userId;
+        const wallet = await Wallet.findOne({ where: { userId: userId } });
+
+        if (!wallet) throw new NotFoundError(`User wallet not found with id ${userId}`);
+
+        const page = req.query.page ? Number(req.query.page) : 1;
+        const size = req.query.size ? Number(req.query.size) : 10;
+        if (page < 1 || size < 0) return next(new BadRequestError('Invalid pagination parameters'));
+
+        let limit = null;
+        let offset = null;
+
+        if (page && size) {
+            ({ limit, offset } = getPagination(page, size));
+        }
+
+        const transactions = await Transaction.findAndCountAll({
+            where: { walletId: wallet.id },
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset,
+        });
+
+        const specificCount = transactions.rows.length;
+
+        if (specificCount === 0) throw new NotFoundError(`No transactions found for user with id ${userId}`);
+
+        const response = getPagingData(transactions, page, limit, 'result');
+
+        if (response.totalPages === null) {
+            response.totalPages = 1;
+        }
+
+        return res.status(200).json({ status: 'success', data: response });
     }
 
     // Delete a transaction

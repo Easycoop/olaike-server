@@ -1,6 +1,6 @@
-const db = require('../database/models/index');
-const Permission = db.Permission;
-const Role = db.Role;
+const { Role, Wallet, Group, Permission, sequelize, Password, User } = require('../database/models/index');
+const LogService = require('../helpers/logs/logs.service');
+
 const { InternalServerError } = require('../utils/error');
 
 class MiscController {
@@ -145,20 +145,106 @@ class MiscController {
         }
     }
 
+    // Create master group
     static async createMasterGroup(req, res) {
-        // Create master group
+        const t = await sequelize.transaction();
 
-        try {
-            const masterGroup = await Group.create({
+        const existingMasterGroup = await Group.findOne({ where: { name: `master` }, transaction: t });
+
+        if (existingMasterGroup) {
+            throw new InternalServerError('Master group already exists');
+        }
+
+        const masterGroup = await Group.create(
+            {
                 name: 'master',
                 description: 'master group has access to all other groups resources',
-            });
-            res.status(200).json({
+                entranceFee: 0,
+            },
+            { transaction: t },
+        );
+
+        // Create wallet for master
+        const newWallet = await Wallet.create(
+            {
+                groupId: masterGroup.id,
+                balance: 0,
+                currency: 'NGN',
+            },
+            { transaction: t },
+        );
+
+        await masterGroup.update({ walletId: newWallet.id });
+        await masterGroup.save();
+
+        await t.commit();
+
+        LogService.createLog('SERVICE', null, 'system', 'master group created');
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Master Group created successfully',
+        });
+    }
+
+    // Create super admin
+    static async createSuperAdmin(req, res, next) {
+        const { firstName, lastName, email, password, phone } = req.body;
+        const t = await sequelize.transaction();
+
+        try {
+            // Find the master group
+            const masterGroup = await Group.findOne({ where: { name: `master` }, transaction: t });
+
+            // Create new user
+            const newUser = await User.create(
+                {
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    groupId: masterGroup.id,
+                },
+                { transaction: t },
+            );
+
+            // Find the EndUser role
+            const userRole = await Role.findOne({ where: { name: `SuperAdmin` }, transaction: t });
+            if (!userRole) {
+                throw new Error('role not found');
+            }
+
+            // Assign role to the new user
+            await newUser.addRole(userRole, { transaction: t });
+
+            // Create user password
+            await Password.create(
+                {
+                    userId: newUser.id,
+                    password: password,
+                },
+                { transaction: t },
+            );
+
+            // Create wallet for the new user
+            const newWallet = await Wallet.create(
+                {
+                    userId: newUser.id,
+                    balance: 0,
+                    currency: 'NGN',
+                },
+                { transaction: t },
+            );
+
+            // Commit the transaction if everything succeeds
+            await t.commit();
+
+            res.status(201).json({
                 status: 'success',
-                message: 'Master Group created successfully',
+                data: { user: newUser },
             });
-        } catch (e) {
-            throw new InternalServerError('Error creating master group', e);
+        } catch (error) {
+            next(error);
         }
     }
 }

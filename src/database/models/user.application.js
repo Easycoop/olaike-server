@@ -78,6 +78,10 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: false,
                 allowNull: false,
             },
+            referralCode: {
+                type: DataTypes.BIGINT,
+                allowNull: true,
+            },
             uniqueString: {
                 type: DataTypes.BIGINT,
                 allowNull: true,

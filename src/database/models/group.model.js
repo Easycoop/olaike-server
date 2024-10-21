@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            entranceFee: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
             type: {
                 type: DataTypes.ENUM('typeA', 'typeB'),
                 defaultValue: 'typeA',
@@ -43,6 +47,12 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         Group.hasOne(models.Wallet, {
+            foreignKey: 'groupId',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+
+        Group.hasOne(models.Transaction, {
             foreignKey: 'groupId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',

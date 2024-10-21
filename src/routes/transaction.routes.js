@@ -6,6 +6,9 @@ const { checkRoles } = require('../middlewares/role.permission');
 const { AuthTokenType } = require('../utils/token');
 const TransactionController = require('../controllers/transaction.controller');
 
-router.get('/wallets', verifyAuth(AuthTokenType.Access), TransactionController.getAllTransactions);
+router
+    .get('/group', verifyAuth(AuthTokenType.Access), TransactionController.getAllTransactionsByGroups)
+    .get('/wallet/:walletId', verifyAuth(AuthTokenType.Access), TransactionController.getWalletTransactions)
+    .get('/user/:userId', verifyAuth(AuthTokenType.Access), TransactionController.getUserTransactions);
 
 module.exports = { router };

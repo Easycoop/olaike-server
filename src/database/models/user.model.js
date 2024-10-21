@@ -98,6 +98,10 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             profileImage: { type: DataTypes.STRING(), allowNull: true },
+            referralCode: {
+                type: DataTypes.BIGINT,
+                allowNull: true,
+            },
             uniqueString: {
                 type: DataTypes.BIGINT,
                 allowNull: true,

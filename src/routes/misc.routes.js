@@ -6,6 +6,9 @@ const { checkRoles, checkPermissions } = require('../middlewares/role.permission
 const { AuthTokenType } = require('../utils/token');
 const MiscController = require('../controllers/misc.controller');
 
-router.get('/init-roles-permissions', MiscController.initializeRolesandPermissions);
+router
+    .get('/init-roles-permissions', MiscController.initializeRolesandPermissions)
+    .get('/init-create-master-group', MiscController.createMasterGroup)
+    .post('/init-create-super-admin', MiscController.createSuperAdmin);
 
 module.exports = { router };

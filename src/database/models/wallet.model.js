@@ -94,7 +94,7 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         Wallet.hasMany(models.SubWallet, {
-            foreignKey: 'mainWalletId',
+            foreignKey: 'walletId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
         });

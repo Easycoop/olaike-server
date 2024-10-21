@@ -8,13 +8,13 @@ module.exports = (sequelize, DataTypes) => {
                 primaryKey: true,
                 allowNull: false,
             },
-            userId: {
-                type: DataTypes.UUID,
-                allowNull: false,
-            },
-
             name: {
                 type: DataTypes.STRING,
+                allowNull: false,
+            },
+            type: {
+                type: DataTypes.ENUM('typeA', 'typeB', 'typeC'),
+                defaultValue: 'typeA',
                 allowNull: false,
             },
             balance: {
@@ -22,9 +22,10 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 defaultValue: 0.0,
             },
-            isDefault: {
-                type: DataTypes.BOOLEAN, // Identifies the default sub-wallet
-                defaultValue: false,
+            currency: {
+                type: DataTypes.STRING,
+                defaultValue: 'NGN',
+                allowNull: false,
             },
         },
         {
@@ -37,12 +38,6 @@ module.exports = (sequelize, DataTypes) => {
 
     // =========== SUB-WALLET ASSOCIATIONS =========== //
     SubWallet.associate = (models) => {
-        SubWallet.belongsTo(models.User, {
-            foreignKey: 'userId',
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        });
-
         SubWallet.belongsTo(models.Wallet, {
             foreignKey: 'subwalletId',
             onDelete: 'CASCADE',
