@@ -17,16 +17,16 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             content: {
-                type: DataTypes.TEXT,
+                type: DataTypes.STRING,
                 allowNull: true,
             },
             fileUrl: {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
-            readStatus: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false,
+            status: {
+                type: DataTypes.ENUM('sent', 'delivered', 'read'),
+                defaultValue: 'sent',
             },
         },
         {
@@ -38,8 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     );
 
     Message.associate = (models) => {
-        Message.belongsTo(models.User, { foreignKey: 'senderId', as: 'sender' });
-        Message.belongsTo(models.User, { foreignKey: 'recipientId', as: 'recipient' });
+        Message.belongsTo(models.User, { foreignKey: 'messageId' });
     };
 
     return Message;

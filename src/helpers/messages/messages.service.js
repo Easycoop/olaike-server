@@ -1,5 +1,5 @@
-// services/messageService.js
 const { Message } = require('../../database/models/index');
+const Op = require('sequelize').Op;
 
 class MessageService {
     static async sendMessage(senderId, recipientId, content, fileUrl = null) {
@@ -28,6 +28,10 @@ class MessageService {
                 },
                 order: [['createdAt', 'ASC']],
             });
+
+            if (!messages) {
+                return null;
+            }
             return messages;
         } catch (error) {
             console.error('Failed to fetch messages:', error.message);

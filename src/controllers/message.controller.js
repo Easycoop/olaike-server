@@ -1,4 +1,6 @@
 const MessageService = require('../helpers/messages/messages.service');
+const { Message, User } = require('../database/models/index');
+const Op = require('sequelize').Op;
 
 class MessageController {
     static async sendMessage(req, res) {
@@ -55,6 +57,29 @@ class MessageController {
                 status: 'error',
                 message: error.message,
             });
+        }
+    }
+
+    static async getAllMessagesForUser(req, res) {
+        try {
+            const userId = req.params.userId; // Get userId from request params
+
+            // Find all messages where the user is either the sender or receiver
+            const messages = await Message.findAll({
+                where: {
+                    [Op.or]: [{ senderId: userId }, { receiverId: userId }],
+                },
+                include: [
+                    { model: User, as: 'sender', attributes: ['id', 'name'] },
+                    { model: User, as: 'receiver', attributes: ['id', 'name'] },
+                ],
+                order: [['createdAt', 'ASC']], // Sort messages by creation time
+            });
+
+            res.status(200).json({ status: 'success', data: messages });
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            res.status(500).json({ error: 'Failed to fetch messages' });
         }
     }
 }

@@ -9,6 +9,7 @@ const MiscController = require('../controllers/misc.controller');
 router
     .get('/init-roles-permissions', MiscController.initializeRolesandPermissions)
     .get('/init-create-master-group', MiscController.createMasterGroup)
-    .post('/init-create-super-admin', MiscController.createSuperAdmin);
+    .post('/init-create-super-admin', MiscController.createSuperAdmin)
+    .post('/send-referral-email', MiscController.sendReferralEmail);
 
 module.exports = { router };

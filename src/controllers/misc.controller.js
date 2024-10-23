@@ -1,5 +1,6 @@
 const { Role, Wallet, Group, Permission, sequelize, Password, User } = require('../database/models/index');
 const LogService = require('../helpers/logs/logs.service');
+const { MiscMailService } = require('../services/mail.service/mail');
 
 const { InternalServerError } = require('../utils/error');
 
@@ -246,6 +247,30 @@ class MiscController {
         } catch (error) {
             next(error);
         }
+    }
+
+    //Send referral email
+    static async sendReferralEmail(req, res) {
+        const { userId, email } = req.body;
+        const user = await User.findByPk(userId);
+        if (!user) throw new InternalServerError(`User with userId ${userId} not found`);
+
+        const group = await Group.findByPk(user.groupId);
+
+        const referralLink = `${process.env.BASE_URL}/signup/rc/${user.referralCode}`;
+
+        MiscMailService.sendReferralEmail({
+            email,
+            referralLink,
+            society: group.name,
+            firstName: user.firstName,
+            lastName: user.lastName,
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Referral mail send successfully',
+        });
     }
 }
 

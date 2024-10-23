@@ -1,7 +1,7 @@
 //CLIENT SIDE INTEGRATION
 
 // Example client-side Socket.io usage
-const socket = io('http://localhost:5000'); // Update with your server's URL
+const socket = io('http://localhost:5000'); // Update with live server's URL
 
 // Join a chatroom
 socket.emit('joinChatroom', 'chatroomId123');
