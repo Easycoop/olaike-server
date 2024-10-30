@@ -1,4 +1,4 @@
-const { Message } = require('../../database/models/index');
+const { Message, Conversation, User } = require('../../database/models/index');
 const Op = require('sequelize').Op;
 
 class MessageService {
@@ -10,6 +10,35 @@ class MessageService {
                 content,
                 fileUrl,
             });
+            const conversation = await Conversation.findOne({
+                where: {
+                    [Op.or]: [
+                        { userId1: senderId, userId2: recipientId },
+                        { userId2: senderId, userId1: recipientId },
+                    ],
+                },
+            });
+
+            if (conversation) {
+                // Update lastMessageId in Conversation
+                await conversation.update({ lastMessageId: message.id, lastMessageContent: message.content });
+                await conversation.save();
+            } else {
+                console.log(3);
+
+                const user1 = await User.findOne({ where: { id: senderId } });
+                const user2 = await User.findOne({ where: { id: recipientId } });
+
+                await Conversation.create({
+                    userId1: senderId,
+                    userId2: recipientId,
+                    userId1Name: `${user1.firstName} ${user1.lastName}`,
+                    userId2Name: `${user2.firstName} ${user2.lastName}`,
+                    lastMessageId: message.id,
+                    lastMessageContent: message.content,
+                });
+            }
+
             return message;
         } catch (error) {
             console.error('Failed to send message:', error.message);

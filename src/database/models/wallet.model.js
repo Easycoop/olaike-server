@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             balance: {
-                type: DataTypes.DECIMAL(10, 2),
+                type: DataTypes.DECIMAL(20, 2),
                 defaultValue: 0,
                 allowNull: false,
             },
@@ -94,6 +94,11 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         Wallet.hasMany(models.SubWallet, {
+            foreignKey: 'walletId',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+        Wallet.hasMany(models.Fees, {
             foreignKey: 'walletId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',

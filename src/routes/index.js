@@ -15,6 +15,10 @@ const { router: budgetRoute } = require('./budget.routes');
 const { router: paymentRoute } = require('./payment.routes');
 const { router: applicationRoute } = require('./application.routes');
 const { router: messageRoute } = require('./message.routes');
+const { router: conversationRoute } = require('./conversation.routes');
+const { router: feesRoute } = require('./fees.routes');
+const { router: loanApplicationRoute } = require('./loan.application.routes.js');
+const { router: requestWithdrawRoute } = require('./request.withdraw.routes.js');
 
 const router = Router();
 
@@ -34,6 +38,10 @@ router
     .use('/budget', budgetRoute)
     .use('/application', applicationRoute)
     .use('/message', messageRoute)
+    .use('/conversation', conversationRoute)
+    .use('/fees', feesRoute)
+    .use('/loan-application', loanApplicationRoute)
+    .use('/request-withdraw', requestWithdrawRoute)
     .use('/misc', miscRoute);
 
 module.exports = { routeHandler: router };

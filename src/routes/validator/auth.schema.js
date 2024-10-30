@@ -92,9 +92,9 @@ class AuthSchemaValidator {
                 .refine((data) => this.validateEmail(data)),
             password: z
                 .string()
-                .min(8)
-                .trim()
-                .refine((data) => this.validatePassword(data)),
+                // .min(8)
+                .trim(),
+            // .refine((data) => this.validatePassword(data)),
         }),
     });
 

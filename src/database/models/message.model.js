@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             content: {
-                type: DataTypes.STRING,
+                type: DataTypes.STRING(2000),
                 allowNull: true,
             },
             fileUrl: {
@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Message.associate = (models) => {
         Message.belongsTo(models.User, { foreignKey: 'messageId' });
+        Message.belongsTo(models.Conversation, { foreignKey: 'conversationId' });
     };
 
     return Message;

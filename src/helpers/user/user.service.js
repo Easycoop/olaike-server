@@ -1,9 +1,10 @@
-const { User, Role, Password, Permission, Wallet, SubWallet } = require('../../database/models/index');
+const { User, Role, Password, Permission, Wallet, SubWallet, Group } = require('../../database/models/index');
 const { BadRequestError } = require('../../utils/error');
 const { sequelize } = require('../../database/models/index.js');
+const FeesService = require('../fees/fees.service.js');
 
 class UserService {
-    static async createUser(id, action, firstName, lastName, email, password, group, gender) {
+    static async createUser(id, action, firstName, lastName, email, password, group, gender, referral) {
         const t = await sequelize.transaction(); // Start a transaction
         // Generate a random referral string(8 digits)
         const referralCode = Math.floor(10000000 + Math.random() * 90000000).toString(); // 8 digit referral code
@@ -25,6 +26,15 @@ class UserService {
                 },
                 { transaction: t },
             );
+
+            if (referral) {
+                const referralUser = await User.findOne({ where: { referralCode: referral } });
+                if (referralUser) {
+                    // Add referral money
+                    const referralWallet = await Wallet.findOne({ where: { userId: referralUser.id }, transaction: t });
+                    await referralWallet.increment('balance', { by: 500 });
+                }
+            }
 
             // Find the EndUser role
             const endUserRole = await Role.findOne({ where: { name: 'EndUser' }, transaction: t });
@@ -86,7 +96,7 @@ class UserService {
                     balance: 0,
                     currency: 'NGN',
                     type: 'typeB',
-                    name: 'Home Savings Wallet',
+                    name: 'Building',
                 },
                 { transaction: t },
             );
@@ -98,13 +108,19 @@ class UserService {
                     balance: 0,
                     currency: 'NGN',
                     type: 'typeC',
-                    name: 'Holiday Wallet',
+                    name: 'Loan',
                 },
                 { transaction: t },
             );
 
+            await newUser.update({ walletId: newWallet.id });
+            await newUser.save();
+
+            const myGroup = await Group.findOne({ where: { id: group } });
+
             // Commit the transaction if everything succeeds
             await t.commit();
+            await FeesService.createFee('entrance_fee', myGroup.entranceFee, 'paid', newWallet.id);
             return newUser;
         } catch (error) {
             console.error('Failed to create user:', error.message);

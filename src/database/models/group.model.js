@@ -21,6 +21,16 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: false,
             },
+            recurrentPayment: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                defaultValue: 1150,
+            },
+            recurrentPaymentFrequency: {
+                type: DataTypes.ENUM('daily', 'weekly', 'bi-weekly', 'monthly', 'quarterly', 'yearly'),
+                allowNull: false,
+                defaultValue: 'weekly',
+            },
             type: {
                 type: DataTypes.ENUM('typeA', 'typeB'),
                 defaultValue: 'typeA',
@@ -28,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
             isActive: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true,
+            },
+            walletId: {
+                type: DataTypes.UUID,
+                allowNull: true,
             },
         },
         {

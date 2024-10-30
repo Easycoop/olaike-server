@@ -72,6 +72,12 @@ class GroupController {
             throw new NotFoundError(`Group with id ${groupId} not found`);
         }
 
+        const groupWallet = await Wallet.findOne({ where: { groupId: groupId } });
+
+        if (groupWallet) {
+            await groupWallet.destroy();
+        }
+
         await group.destroy();
 
         res.status(204).json({

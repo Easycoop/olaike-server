@@ -13,6 +13,7 @@ router
         verifyAuth(AuthTokenType.Access),
         AuthenticatedController(TransactionController.initiatePayment),
     )
+    .post('/initialize-entry', AuthenticatedController(TransactionController.initiatePaymentEntry))
     .get(
         '/verify/:reference',
         verifyAuth(AuthTokenType.Access),
@@ -23,6 +24,9 @@ router
         verifyAuth(AuthTokenType.Access),
         AuthenticatedController(TransactionController.verifyTransactionFund),
     )
+    .get('/verify-entry/:reference', AuthenticatedController(TransactionController.verifyTransactionEntry))
+    .get('/verify-savings/:reference', AuthenticatedController(TransactionController.verifyTransactionSavings))
+    .get('/verify-loan/:reference', AuthenticatedController(TransactionController.verifyTransactionLoan))
     .post(
         '/create-subscription-plan',
         verifyAuth(AuthTokenType.Access),

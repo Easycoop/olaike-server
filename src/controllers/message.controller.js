@@ -62,17 +62,17 @@ class MessageController {
 
     static async getAllMessagesForUser(req, res) {
         try {
-            const userId = req.params.userId; // Get userId from request params
+            const { id } = req.authPayload.user; // Get userId from request params
 
             // Find all messages where the user is either the sender or receiver
             const messages = await Message.findAll({
                 where: {
-                    [Op.or]: [{ senderId: userId }, { receiverId: userId }],
+                    [Op.or]: [{ senderId: id }, { recipientId: id }],
                 },
-                include: [
-                    { model: User, as: 'sender', attributes: ['id', 'name'] },
-                    { model: User, as: 'receiver', attributes: ['id', 'name'] },
-                ],
+                // include: [
+                //     { model: User, as: 'sender', attributes: ['id', 'name'] },
+                //     { model: User, as: 'receiver', attributes: ['id', 'name'] },
+                // ],
                 order: [['createdAt', 'ASC']], // Sort messages by creation time
             });
 

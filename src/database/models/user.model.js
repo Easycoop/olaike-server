@@ -71,7 +71,6 @@ module.exports = (sequelize, DataTypes) => {
             phone: {
                 type: DataTypes.BIGINT,
                 allowNull: true,
-                unique: true,
                 validate: {
                     len: {
                         args: [10, 15],
@@ -114,6 +113,24 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
                 allowNull: true,
             },
+            loanBalance: {
+                type: DataTypes.DECIMAL(20, 2),
+                defaultValue: 0,
+                allowNull: false,
+            },
+            loanStatus: {
+                type: DataTypes.ENUM('active', 'inactive', 'pending'),
+                defaultValue: 'inactive',
+                allowNull: false,
+            },
+            loanApplicationId: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
+            walletId: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
         },
         {
             tableName: 'users',
@@ -140,7 +157,7 @@ module.exports = (sequelize, DataTypes) => {
         // A user can have direct permissions, separate from roles
         User.belongsToMany(models.Permission, { through: models.UserPermissions });
 
-        User.hasMany(models.Wallet, {
+        User.hasOne(models.Wallet, {
             foreignKey: 'userId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
@@ -171,6 +188,21 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         User.hasMany(models.Message, {
+            foreignKey: 'userId',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+        User.hasMany(models.Conversation, {
+            foreignKey: 'userId',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+        User.hasMany(models.RequestWithdraw, {
+            foreignKey: 'userId',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+        User.hasMany(models.LoanApplication, {
             foreignKey: 'userId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',

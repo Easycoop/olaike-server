@@ -1,6 +1,6 @@
 const db = require('../../database/models/index');
 const User = db.User;
-const Password = db.Password;
+const Wallet = db.Wallet;
 const Group = db.Group;
 const UserApplication = db.UserApplication;
 const { BadRequestError, InternalServerError } = require('../../utils/error');
@@ -11,6 +11,7 @@ const { getPagination, getPagingData } = require('../../utils/pagination.js');
 const LogService = require('../../helpers/logs/logs.service.js');
 const UserService = require('../../helpers/user/user.service.js');
 const NotificationService = require('../../helpers/notification/notification.service.js');
+const FeesService = require('../../helpers/fees/fees.service.js');
 
 class UserApplicationsController {
     static async newUserApplication(req, res) {
@@ -35,6 +36,10 @@ class UserApplicationsController {
                     referralCode: _referralCode,
                     status: 'pending',
                 });
+
+                const wallet = await Wallet.findOne({ where: { groupId: group } });
+
+                await wallet.increment('balance', { by: wallet.entranceFee });
 
                 LogService.createLog('SERVICE', null, 'user', 'new user registration');
                 AuthMailService.sendRegistrationComplete({ email, firstName, lastName });
@@ -82,7 +87,7 @@ class UserApplicationsController {
         });
     }
     static async updateUserApplication(req, res) {
-        const { id, action, firstName, lastName, email, password, group, gender } = req.body;
+        const { id, action, firstName, lastName, email, password, group, gender, referral } = req.body;
         await sequelize.transaction(async (t) => {
             if (action == 'accept') {
                 await UserApplication.update(
@@ -96,7 +101,17 @@ class UserApplicationsController {
 
                 // Create new user
                 try {
-                    await UserService.createUser(id, action, firstName, lastName, email, password, group, gender);
+                    await UserService.createUser(
+                        id,
+                        action,
+                        firstName,
+                        lastName,
+                        email,
+                        password,
+                        group,
+                        gender,
+                        referral,
+                    );
 
                     LogService.createLog('AUTH', null, 'user', 'user registration accepted');
 

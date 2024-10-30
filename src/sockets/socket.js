@@ -1,6 +1,7 @@
 // sockets/socket.js
 const { Server } = require('socket.io');
-const { Message } = require('../database/models/index');
+const { Message, Conversation, User } = require('../database/models/index');
+const Op = require('sequelize').Op;
 
 let users = {};
 
@@ -49,6 +50,33 @@ const initializeSocketIO = (httpServer) => {
                     status: 'sent',
                 });
 
+                const conversation = await Conversation.findOne({
+                    where: {
+                        [Op.or]: [
+                            { userId1: senderId, userId2: recipientId },
+                            { userId2: senderId, userId1: recipientId },
+                        ],
+                    },
+                });
+
+                if (conversation) {
+                    // Update lastMessageId in Conversation
+                    await conversation.update({ lastMessageId: newMessage.id, lastMessageContent: newMessage.content });
+                    await conversation.save();
+                } else {
+                    const user1 = await User.findOne({ where: { id: senderId } });
+                    const user2 = await User.findOne({ where: { id: recipientId } });
+
+                    await Conversation.create({
+                        userId1: senderId,
+                        userId2: recipientId,
+                        userId1Name: `${user1.firstName} ${user1.lastName}`,
+                        userId2Name: `${user2.firstName} ${user2.lastName}`,
+                        lastMessageId: newMessage.id,
+                        lastMessageContent: newMessage.content,
+                    });
+                }
+
                 const recipientSocketId = users[recipientId];
                 if (recipientSocketId) {
                     io.to(recipientSocketId).emit('directMessage', newMessage);
@@ -60,8 +88,21 @@ const initializeSocketIO = (httpServer) => {
         });
 
         // Handle typing indicator
-        socket.on('typing', (userId) => {
-            socket.broadcast.emit('typing', { userId });
+        socket.on('typing', (data) => {
+            const { recipientId } = data;
+            const recipientSocketId = users[recipientId];
+            if (recipientSocketId) {
+                io.to(recipientSocketId).emit('typing', { recipientId });
+            }
+        });
+
+        // Handle not typing indicator
+        socket.on('notTyping', (data) => {
+            const { recipientId } = data;
+            const recipientSocketId = users[recipientId];
+            if (recipientSocketId) {
+                io.to(recipientSocketId).emit('notTyping', { recipientId });
+            }
         });
 
         // Handle disconnection
