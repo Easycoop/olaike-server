@@ -16,4 +16,6 @@ router.get('/:applicationId', verifyAuth(AuthTokenType.Access), LoanApplicationC
 
 router.get('/', verifyAuth(AuthTokenType.Access), LoanApplicationController.getAllUserApplicationsByGroups);
 
+router.post('/update', verifyAuth(AuthTokenType.Access), LoanApplicationController.updateLoanApplication);
+
 module.exports = { router };

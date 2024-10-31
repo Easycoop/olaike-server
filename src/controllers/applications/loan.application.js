@@ -5,7 +5,9 @@ const LoanApplication = db.LoanApplication;
 const User = db.User;
 const Group = db.Group;
 const Wallet = db.Wallet;
+const SubWallet = db.SubWallet;
 const { NotFoundError, InternalServerError, BadRequestError } = require('../../utils/error');
+const { AuthMailService } = require('../../services/mail.service/mail');
 const Op = require('sequelize').Op;
 
 class LoanApplicationController {
@@ -17,6 +19,7 @@ class LoanApplicationController {
             phone,
             gender,
             dob,
+            amount,
             address,
             employmentStatus,
             employerName,
@@ -39,8 +42,6 @@ class LoanApplicationController {
             userId,
         } = req.body;
 
-        console.log('laos', nokEmail);
-
         let updateFields = {};
         if (firstName) updateFields.firstName = firstName;
         if (lastName) updateFields.lastName = lastName;
@@ -48,6 +49,7 @@ class LoanApplicationController {
         if (phone) updateFields.phone = phone;
         if (gender) updateFields.gender = gender;
         if (dob) updateFields.dob = dob;
+        if (amount) updateFields.amount = amount;
         if (address) updateFields.address = address;
         if (employmentStatus) updateFields.employmentStatus = employmentStatus;
         if (employerName) updateFields.employerName = employerName;
@@ -83,6 +85,7 @@ class LoanApplicationController {
                 phone,
                 gender,
                 dob,
+                amount,
                 address,
                 employmentStatus,
                 employerName,
@@ -138,6 +141,7 @@ class LoanApplicationController {
             phone,
             gender,
             dob,
+            amount,
             address,
             employmentStatus,
             employerName,
@@ -167,6 +171,7 @@ class LoanApplicationController {
             !email ||
             !phone ||
             !gender ||
+            !amount ||
             !address ||
             !employmentStatus ||
             !employerName ||
@@ -201,6 +206,7 @@ class LoanApplicationController {
             phone,
             gender,
             dob,
+            amount,
             address,
             employmentStatus,
             employerName,
@@ -325,6 +331,70 @@ class LoanApplicationController {
             response.totalPages = 1;
         }
         return res.status(200).json({ success: true, data: response });
+    }
+
+    static async updateLoanApplication(req, res) {
+        const { id, userId, amount, action } = req.body;
+        await sequelize.transaction(async (t) => {
+            if (action == 'accept') {
+                await User.update(
+                    { loanStatus: 'active' },
+                    {
+                        where: {
+                            id: userId,
+                        },
+                    },
+                );
+
+                await LoanApplication.update(
+                    { status: 'active' },
+                    {
+                        where: {
+                            id: id,
+                        },
+                    },
+                );
+
+                const userWallet = await Wallet.findOne({ where: { userId: userId } });
+
+                if (!userWallet) {
+                    throw new NotFoundError(`Wallet not found for user with id ${userId}`);
+                }
+
+                const subWallet = await SubWallet.findOne({ where: { walletId: userWallet.id, name: 'Loan' } });
+
+                if (!subWallet) {
+                    throw new InternalServerError('Savings wallet not found');
+                }
+
+                await subWallet.increment('balance', { by: amount, transaction: t });
+            } else if (action == 'reject') {
+                await User.update(
+                    { status: 'inactive' },
+                    {
+                        where: {
+                            id: userId,
+                        },
+                    },
+                );
+
+                await LoanApplication.update(
+                    { status: 'active' },
+                    {
+                        where: {
+                            id: id,
+                        },
+                    },
+                );
+            } else {
+                throw new BadRequestError('failed');
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'successful',
+            });
+        });
     }
 }
 

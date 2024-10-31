@@ -197,12 +197,12 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
         });
-        User.hasMany(models.RequestWithdraw, {
+        User.hasMany(models.LoanApplication, {
             foreignKey: 'userId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
         });
-        User.hasMany(models.LoanApplication, {
+        User.hasMany(models.WithdrawRequest, {
             foreignKey: 'userId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',

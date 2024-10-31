@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
                 allowNull: true,
             },
+            amount: {
+                type: DataTypes.BIGINT,
+                allowNull: true,
+            },
             address: {
                 type: DataTypes.STRING,
                 allowNull: true,

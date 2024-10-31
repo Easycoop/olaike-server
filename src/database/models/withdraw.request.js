@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    const RequestWithdraw = sequelize.define(
-        'RequestWithdraw',
+    const WithdrawRequest = sequelize.define(
+        'WithdrawRequest',
         {
             id: {
                 type: DataTypes.UUID,
@@ -17,22 +17,27 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
+            status: {
+                type: DataTypes.ENUM('successful', 'unsuccessful', 'pending'),
+                defaultValue: 'pending',
+                allowNull: false,
+            },
         },
         {
-            tableName: 'request_withdraw',
+            tableName: 'withdraw_requests',
             timestamps: true,
             underscored: true,
         },
     );
 
-    // Association: A RequestWithdraw belongs to a user
-    RequestWithdraw.associate = (models) => {
-        RequestWithdraw.belongsTo(models.User, {
-            foreignKey: 'requestWithdrawId',
+    // Association: A WithdrawRequest belongs to a user
+    WithdrawRequest.associate = (models) => {
+        WithdrawRequest.belongsTo(models.User, {
+            foreignKey: 'withdrawRequestId',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
         });
     };
 
-    return RequestWithdraw;
+    return WithdrawRequest;
 };
