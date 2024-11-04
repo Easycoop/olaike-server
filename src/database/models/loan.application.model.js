@@ -91,6 +91,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            nin: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             verificationDocument: {
                 type: DataTypes.STRING,
                 allowNull: true,

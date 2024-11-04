@@ -31,6 +31,7 @@ class LoanApplicationController {
             nokPhone,
             nokRelationship,
             bvn,
+            nin,
             verificationDocument,
             guarantorFirstName,
             guarantorLastName,
@@ -61,6 +62,7 @@ class LoanApplicationController {
         if (nokPhone) updateFields.nokPhone = nokPhone;
         if (nokRelationship) updateFields.nokRelationship = nokRelationship;
         if (bvn) updateFields.bvn = bvn;
+        if (nin) updateFields.nin = nin;
         if (verificationDocument) updateFields.verificationDocument = verificationDocument;
         if (guarantorFirstName) updateFields.guarantorFirstName = guarantorFirstName;
         if (guarantorLastName) updateFields.guarantorLastName = guarantorLastName;
@@ -97,6 +99,7 @@ class LoanApplicationController {
                 nokPhone,
                 nokRelationship,
                 bvn,
+                nin,
                 verificationDocument,
                 guarantorFirstName,
                 guarantorLastName,
@@ -153,6 +156,7 @@ class LoanApplicationController {
             nokPhone,
             nokRelationship,
             bvn,
+            nin,
             verificationDocument,
             guarantorFirstName,
             guarantorLastName,
@@ -183,6 +187,7 @@ class LoanApplicationController {
             !nokPhone ||
             !nokRelationship ||
             !bvn ||
+            !nin ||
             // !verificationDocument ||
             !guarantorFirstName ||
             !guarantorLastName ||
@@ -218,6 +223,7 @@ class LoanApplicationController {
             nokPhone,
             nokRelationship,
             bvn,
+            nin,
             verificationDocument,
             guarantorFirstName,
             guarantorLastName,
@@ -330,6 +336,7 @@ class LoanApplicationController {
         if (response.totalPages === null) {
             response.totalPages = 1;
         }
+
         return res.status(200).json({ success: true, data: response });
     }
 

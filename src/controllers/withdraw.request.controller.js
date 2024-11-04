@@ -1,7 +1,5 @@
-const db = require('../database/models/index');
+const { sequelize, WithdrawRequest, Group, Wallet, SubWallet } = require('../database/models/index.js');
 const { getPagination, getPagingData } = require('../utils/pagination');
-const WithdrawRequest = db.WithdrawRequest;
-const Group = db.Group;
 
 class WithdrawRequestController {
     static async request(req, res) {
@@ -13,6 +11,20 @@ class WithdrawRequestController {
                 reason,
                 userId: userId,
             });
+
+            const wallet = await Wallet.findOne({ where: { userId: userId } });
+
+            if (!wallet) {
+                throw new NotFoundError(`Wallet not found for user with id ${userId}`);
+            }
+
+            if (parseFloat(amount) > parseFloat(wallet.balance)) {
+                return res.status(201).json({
+                    status: 'error',
+                    message: 'Insufficient balance',
+                    data: newRequest,
+                });
+            }
 
             res.status(201).json({
                 status: 'success',
@@ -144,6 +156,7 @@ class WithdrawRequestController {
                 }
 
                 await subWallet.increment('balance', { by: amount, transaction: t });
+                await userWallet.increment('balance', { by: -amount, transaction: t });
             } else if (action == 'reject') {
                 await WithdrawRequest.update(
                     { status: 'unsuccessful' },
