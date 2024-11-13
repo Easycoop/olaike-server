@@ -41,6 +41,5 @@ const config = {
     },
 };
 
-console.log('danny', config[ENV]);
-
-module.exports = config[ENV];
+// module.exports = config[ENV];
+module.exports = config.PROD;
