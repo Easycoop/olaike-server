@@ -1,4 +1,4 @@
-const ENV = process.env.NODE_ENV || 'DEV';
+const ENV = process.env.NODE_ENV || 'PROD';
 
 const config = {
     DEV: {
@@ -40,5 +40,7 @@ const config = {
         },
     },
 };
+
+console.log('danny', config[ENV]);
 
 module.exports = config[ENV];
