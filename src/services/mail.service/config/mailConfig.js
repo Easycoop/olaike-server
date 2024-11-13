@@ -17,12 +17,22 @@ const config = {
         },
     },
     PROD: {
+        // nodemailer: {
+        //     service: 'sendgrid',
+        //     port: 587,
+        //     secure: false,
+        //     auth: {
+        //         apiKey: process.env.SENDGRID_API_KEY,
+        //     },
+        // },
         nodemailer: {
-            service: 'sendgrid',
+            service: 'gmail',
+            host: 'smtp.ethereal.email',
             port: 587,
             secure: false,
             auth: {
-                apiKey: process.env.SENDGRID_API_KEY,
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_PASS,
             },
         },
         sendgrid: {
