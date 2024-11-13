@@ -14,7 +14,7 @@ router.delete('/:applicationId', verifyAuth(AuthTokenType.Access), LoanApplicati
 
 router.get('/:applicationId', verifyAuth(AuthTokenType.Access), LoanApplicationController.getApplication);
 
-router.get('/', verifyAuth(AuthTokenType.Access), LoanApplicationController.getAllUserApplicationsByGroups);
+router.get('/', verifyAuth(AuthTokenType.Access), LoanApplicationController.getAllLoanApplicationsByGroups);
 
 router.post('/update', verifyAuth(AuthTokenType.Access), LoanApplicationController.updateLoanApplication);
 

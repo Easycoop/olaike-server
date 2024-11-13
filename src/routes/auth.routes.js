@@ -136,7 +136,7 @@ router.post('/update-password', AuthController.updatePassword);
  *       200:
  *         description: Logout successful
  */
-router.post('/logout', verifyAuth(AuthTokenType.Access), AuthenticatedController(AuthController.logout));
+router.delete('/logout', verifyAuth(AuthTokenType.Access), AuthenticatedController(AuthController.logout));
 
 /**
  * @swagger

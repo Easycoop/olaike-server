@@ -1,4 +1,14 @@
-const { Role, Wallet, Group, Permission, sequelize, Password, User } = require('../database/models/index');
+const {
+    Role,
+    Wallet,
+    Group,
+    Permission,
+    sequelize,
+    Password,
+    User,
+    LoanApplication,
+    Transaction,
+} = require('../database/models/index');
 const LogService = require('../helpers/logs/logs.service');
 const { MiscMailService } = require('../services/mail.service/mail');
 
@@ -270,6 +280,98 @@ class MiscController {
         res.status(200).json({
             status: 'success',
             message: 'Referral mail send successfully',
+        });
+    }
+
+    //Get data for the admin dashboard
+    static async getAdminDashboardData(req, res) {
+        const { id, groupId } = req.authPayload.user;
+        const user = await User.findByPk(id);
+        if (!user) throw new InternalServerError(`User with userId ${id} not found`);
+
+        const group = await Group.findOne({ where: { id: groupId }, include: Wallet });
+
+        const masterGroup = await Group.findOne({
+            where: {
+                name: 'master',
+            },
+        });
+
+        if (!masterGroup) {
+            throw new InternalServerError('Internal server error');
+        }
+
+        let groupUsers;
+
+        if (groupId == masterGroup.id) {
+            groupUsers = await User.findAll({
+                where: {},
+            });
+        } else {
+            groupUsers = await User.findAll({
+                where: {
+                    groupId,
+                },
+            });
+        }
+
+        const totalUsers = groupUsers.length;
+
+        let loanApplications;
+
+        if (groupId == masterGroup.id) {
+            try {
+                loanApplications = await LoanApplication.findAll({
+                    where: {
+                        status: 'pending',
+                    },
+                });
+            } catch (e) {
+                console.log('kamala lost', e);
+            }
+        } else {
+            loanApplications = await LoanApplication.findAll({
+                where: {
+                    groupId,
+                    status: 'pending',
+                },
+            });
+        }
+
+        const pendingApplications = loanApplications.length;
+
+        let transactions;
+
+        if (groupId == masterGroup.id) {
+            transactions = await Transaction.findAll({
+                where: {
+                    status: 'success',
+                },
+            });
+        } else {
+            transactions = await Transaction.findAll({
+                where: {
+                    groupId,
+                    status: 'success',
+                },
+            });
+        }
+
+        let transactionVolume = 0;
+
+        transactions.forEach((transaction) => {
+            const amount = parseFloat(transaction.amount);
+
+            transactionVolume += amount;
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                totalUsers,
+                pendingApplications,
+                transactionVolume,
+            },
         });
     }
 }

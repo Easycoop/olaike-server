@@ -282,7 +282,7 @@ class LoanApplicationController {
         });
     }
 
-    static async getAllUserApplicationsByGroups(req, res, next) {
+    static async getAllLoanApplicationsByGroups(req, res, next) {
         const groupId = req.authPayload.user.groupId;
 
         const page = req.query.page ? Number(req.query.page) : 1;

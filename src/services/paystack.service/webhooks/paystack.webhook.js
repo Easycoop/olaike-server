@@ -1,5 +1,4 @@
 const db = require('../../../database/models');
-const { logger } = require('../../../middlewares/logger');
 const Subscription = db.subscription;
 const Transaction = db.Transaction;
 const { verifyPaystackSignature } = require('../utils/verify.paystack.signature');
@@ -46,7 +45,7 @@ const paystackWebhook = async (req, res) => {
             break;
 
         default:
-            logger.error(`Unhandled event: ${event}`);
+            console.error(`Unhandled event: ${event}`);
     }
 
     res.status(200).json({ message: 'Webhook processed' });
