@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": " node src/index.js",
+        "start": "cross-env NODE_ENV=PROD node src/index.js",
         "test": "cross-env NODE_ENV=TEST mocha src/test/utils ",
         "dev": "cross-env NODE_ENV=DEV nodemon src/index.js",
         "prod": "cross-env NODE_ENV=PROD nodemon src/index.js",

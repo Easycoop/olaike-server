@@ -41,5 +41,4 @@ const config = {
     },
 };
 
-// module.exports = config[ENV];
-module.exports = config.PROD;
+module.exports = config[ENV];
