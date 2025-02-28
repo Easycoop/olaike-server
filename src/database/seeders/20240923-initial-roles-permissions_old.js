@@ -4,7 +4,7 @@ module.exports = {
     up: async (queryInterface, Sequelize) => {
         // Insert Permissions
         await queryInterface.bulkInsert(
-            'permissions',
+            'Permission',
             [
                 { name: 'create_user', created_at: new Date(), updated_at: new Date() },
                 { name: 'update_user', created_at: new Date(), updated_at: new Date() },
@@ -16,7 +16,7 @@ module.exports = {
 
         // Insert Roles
         await queryInterface.bulkInsert(
-            'roles',
+            'Role',
             [
                 { name: 'SuperAdmin', created_at: new Date(), updated_at: new Date() },
                 { name: 'Admin', created_at: new Date(), updated_at: new Date() },
@@ -27,19 +27,19 @@ module.exports = {
 
         // Fetch Permissions to associate with Roles
         const [createUser, editUser, deleteUser, viewUser] = await queryInterface.sequelize.query(
-            `SELECT id from permissions WHERE name IN ('create_user', 'update_user', 'delete_user', 'read_user')`,
+            `SELECT id from Permissions WHERE name IN ('create_user', 'update_user', 'delete_user', 'read_user')`,
         );
 
         // Fetch Role IDs
-        const [superAdmin] = await queryInterface.sequelize.query(`SELECT id FROM roles WHERE name = 'SuperAdmin'`);
-        const [admin] = await queryInterface.sequelize.query(`SELECT id FROM roles WHERE name = 'Admin'`);
-        const [endUser] = await queryInterface.sequelize.query(`SELECT id FROM roles WHERE name = 'EndUser'`);
+        const [superAdmin] = await queryInterface.sequelize.query(`SELECT id FROM Roles WHERE name = 'SuperAdmin'`);
+        const [admin] = await queryInterface.sequelize.query(`SELECT id FROM Roles WHERE name = 'Admin'`);
+        const [endUser] = await queryInterface.sequelize.query(`SELECT id FROM Roles WHERE name = 'EndUser'`);
 
         // Assign Permissions to SuperAdmin (all permissions)
         const superAdminPermissions = [createUser[0].id, editUser[0].id, deleteUser[0].id, viewUser[0].id];
         for (let permissionId of superAdminPermissions) {
             await queryInterface.bulkInsert(
-                'role_permissions',
+                'RolePermissions',
                 [
                     {
                         role_id: superAdmin[0].id,
@@ -56,7 +56,7 @@ module.exports = {
         const adminPermissions = [createUser[0].id, editUser[0].id, deleteUser[0].id, viewUser[0].id];
         for (let permissionId of adminPermissions) {
             await queryInterface.bulkInsert(
-                'role_permissions',
+                'RolePermissions',
                 [
                     {
                         role_id: admin[0].id,
@@ -71,7 +71,7 @@ module.exports = {
 
         // Create an admin user
         const [adminUser] = await queryInterface.bulkInsert(
-            'users',
+            'User',
             [
                 {
                     first_name: 'Admin',
@@ -89,7 +89,7 @@ module.exports = {
 
         // Assign Admin role to the created admin user
         await queryInterface.bulkInsert(
-            'user_roles',
+            'UserRoles',
             [
                 {
                     user_id: adminUser[0].id,
@@ -103,9 +103,9 @@ module.exports = {
     },
 
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.bulkDelete('role_permissions', null, {});
-        await queryInterface.bulkDelete('roles', null, {});
-        await queryInterface.bulkDelete('permissions', null, {});
-        await queryInterface.bulkDelete('users', { email: 'admin@example.com' }, {});
+        await queryInterface.bulkDelete('RolePermissions', null, {});
+        await queryInterface.bulkDelete('Role', null, {});
+        await queryInterface.bulkDelete('Permission', null, {});
+        await queryInterface.bulkDelete('User', { email: 'admin@example.com' }, {});
     },
 };

@@ -1,5 +1,6 @@
 const db = require('../database/models/index');
 const User = db.User;
+const Wallet = db.Wallet;
 const Password = db.Password;
 const Permission = db.Permission;
 const Role = db.Role;

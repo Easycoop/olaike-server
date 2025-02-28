@@ -46,4 +46,8 @@ const production = {
     },
 };
 
-module.exports = {development};
+module.exports = {
+    development,
+    testing,
+    production,
+};
