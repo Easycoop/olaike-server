@@ -1,4 +1,5 @@
-const ENV = process.env.NODE_ENV || 'PROD';
+// const ENV = process.env.NODE_ENV || 'DEV';
+const ENV = 'DEV';
 
 const config = {
     DEV: {

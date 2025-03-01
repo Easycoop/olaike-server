@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const NODE_ENV = process.env.NODE_ENV || DEV;
+const NODE_ENV = process.env.NODE_ENV || "DEV";
 
 const path =
     NODE_ENV === 'TEST'
