@@ -96,6 +96,11 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: false,
                 allowNull: false,
             },
+            phoneVerified: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+                allowNull: true,
+            },
             profileImage: { type: DataTypes.STRING(), allowNull: true },
             referralCode: {
                 type: DataTypes.BIGINT,
@@ -131,6 +136,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
+            kegowPhoneId:{
+                type: DataTypes.STRING,
+                allowNull: true,
+            }
         },
         {
             tableName: 'users',

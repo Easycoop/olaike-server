@@ -8,6 +8,7 @@ const WalletController = require('../controllers/wallet.controlller');
 
 router.get('/wallets', verifyAuth(AuthTokenType.Access), WalletController.getAllWallets);
 router.get('/:id', verifyAuth(AuthTokenType.Access), WalletController.getWallet);
+router.get('/:id/generate-payment-wallet', verifyAuth(AuthTokenType.Access), WalletController.generatePaymentWallet);
 router.get('/user-wallets/:userId', verifyAuth(AuthTokenType.Access), WalletController.getUserWallets);
 
 module.exports = { router };

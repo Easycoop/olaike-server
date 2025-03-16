@@ -22,6 +22,26 @@ const development = {
     },
 };
 
+// const development = {
+//     database:"easycoopdb",
+//     username:"ezcoup",
+//     password:"9g$9vR2qL8mX!#m",
+//     host:"localhost",
+//     port:"5432",
+//     dialect: 'postgres',
+//     logging: console.log,
+//     dialectOptions: {
+//         ssl: false,
+//         version: '15.1',
+//     },
+
+//     pool: {
+//         max: 5,
+//         min: 0,
+//         acquire: 30000,
+//         idle: 10000,
+//     },
+// };
 const testing = {
     database: 'databasename',
     username: 'username',

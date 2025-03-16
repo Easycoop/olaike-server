@@ -14,10 +14,10 @@ const db = {};
 let sequelize;
 
 switch (ENV) {
-    case 'TEST':
-        sequelize = new Sequelize(config.testing.database, config.testing.username, config.testing.password, {
-            host: config.testing.host,
-            dialect: config.testing.dialect,
+    case 'DEV':
+        sequelize = new Sequelize(config.development.database, config.development.username, config.development.password, {
+            host: config.development.host,
+            dialect: config.development.dialect,
             pool: {
                 max: 5,
                 min: 0,
@@ -80,7 +80,7 @@ Object.keys(db).forEach((modelName) => {
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.sequelize.sync({ force: false }).then(() => {
+db.sequelize.sync({ alter: true }).then(() => {
     logger.info('re-sync completed');
 });
 

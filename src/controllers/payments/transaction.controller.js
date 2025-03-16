@@ -1,4 +1,5 @@
 const Paystack = require('../../services/paystack.service');
+const {walletToBankTransfer, } = require('../../services/kegow.service/transactions');
 const { BadRequestError, InternalServerError } = require('../../utils/error');
 const db = require('../../database/models/index');
 const FeesService = require('../../helpers/fees/fees.service');
@@ -62,7 +63,9 @@ class TransactionController {
                 // callback_url: 'https://your-domain.com/payment/callback',
             };
 
-            const data = await Paystack.Transaction.Initialize(paymentData);
+            // const data = await Paystack.Transaction.Initialize(paymentData);
+            
+            const data = await walletToBankTransfer(paymentData)
 
             if (!data?.status || !data?.data) {
                 return res.status(201).json({
@@ -135,6 +138,8 @@ class TransactionController {
             };
 
             const data = await Paystack.Transaction.Initialize(paymentData);
+            // const data = await walletToBankTransfer(paymentData)
+            // const createKegowWallet = await 
 
             if (!data?.status || !data?.data) {
                 return res.status(201).json({
@@ -424,6 +429,7 @@ class TransactionController {
             res.status(500).json({ message: 'Transaction verification failed', error: error.message });
         }
     }
+    
 
     /**
      * Handles payment verification for funding savings

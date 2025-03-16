@@ -1,8 +1,12 @@
 const db = require('../database/models/index');
-const { User, Role, Password, Group, Wallet, SubWallet } = require('../database/models/index');
+const { User, Role, Password, Group, Wallet, SubWallet, Kyc } = require('../database/models/index');
 
 const { BadRequestError, InternalServerError, NotFoundError } = require('../utils/error');
 const { getPagination, getPagingData } = require('../utils/pagination');
+const kegowWalletService = require('../services/kegow.service/wallets');
+const {formatPhoneNumber} = require('../utils/phoneHeper');
+const {uploadSingleFile} = require('../services/imageupload.service');
+// const kycModel = require('../database/models/kyc.model');
 
 async function validateCreateUser({ email }) {
     const existingUser = await User.findOne({ where: { email: email } });
@@ -228,6 +232,7 @@ class UserController {
             next(error);
         }
     }
+    
 
     // Update user information
     static async updateUser(req, res, next) {
@@ -417,6 +422,182 @@ class UserController {
             next(error);
         }
     }
+
+
+    static async verifyPhone(req, res){
+        
+        try {
+            const phone = req.body.phone;
+            const userId = req.params.id;
+            console.log(phone, userId);
+            
+            const user = await User.findOne({ where: { id: userId } });
+
+            if (!user) {
+                throw new NotFoundError(`User with id ${userId} not found`);
+            }
+            if(user?.phone !== phone) {
+                user.update({ phone: phone });
+            }
+
+            const requestOtp = await kegowWalletService.requestPhoneVerificationOTP(formatPhoneNumber(phone));
+            if(requestOtp?.success){
+                return res.status(200).json({
+                    status: 'success',
+                    message: requestOtp.message
+                }) 
+            }else{
+                return res.status(400).json({
+                    status: 'fail',
+                    message: `${requestOtp?.message}`,
+                });
+            }
+        
+        } catch (error) {
+            return res.status(400).json({
+                status: 'fail',
+                message: `${error?.message}`,
+            });
+        }
+        
+        
+    };
+
+    static async verifyPhoneOtp(req, res){
+        
+        try {
+            const {otp} = req.body;
+            const userId = req.params.id;
+            
+            const user = await User.findOne({ where: { id: userId } });
+           
+            if (!user) {
+                throw new NotFoundError(`User with id ${userId} not found`);
+            }
+            
+            const validateOtp = await kegowWalletService.verifyPhoneWithOTP(formatPhoneNumber(user.phone), otp);
+            if(validateOtp?.success){
+                user.update({ phoneVerified: true, kegowPhoneId:validateOtp?.phoneVerificationId });
+               
+                return res.status(200).json({
+                    status: 'success',
+                    message: validateOtp.message
+                }) 
+            }else{
+                return res.status(400).json({
+                    status: 'fail',
+                    message: `${validateOtp?.message}`,
+                });
+            }
+        
+        } catch (error) {
+            return res.status(400).json({
+                status: 'fail',
+                message: `${error?.message}`,
+            });
+        }
+        
+        
+    };
+
+    static async verifyNin(req, res) {
+        try {
+            const { nin, dob } = req.body;
+            const userId = req.params.id;
+    
+            // Find the user
+            const user = await User.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new NotFoundError(`User with id ${userId} not found`);
+            }
+    
+            // Check if a file was uploaded
+            if (!req.file) {
+                return res.status(400).json({ message: 'No file uploaded' });
+            }
+    
+            // Check if a KYC record with NIN already exists for the user
+            const kycInDB = await Kyc.findOne({ where: { userId: user.id, identificationDocument: "NIN" } });
+    
+            if (kycInDB && kycInDB.status === "accepted") {
+                return res.status(400).json({ status: "fail", message: 'NIN already verified' });
+            }
+            
+            // Upload the file to the specified folder
+            const folder = 'nin_slips';
+            const details = { user, folder };
+            const imageUrl = await uploadSingleFile(req.file, details);
+    
+            if (!imageUrl) {
+                throw new Error('File upload failed');
+            }
+            // Prepare the KYC data to be updated or created
+            const kycData = {
+                documentFile: imageUrl,
+                documentIdentifier: nin,
+                identificationDocument: 'NIN',
+                userId: user.id,
+            };
+    
+            let ninInDB;
+    
+            if (kycInDB) {
+                // Update existing KYC record
+                [_, [ninInDB]] = await Kyc.update(kycData, { where: { userId: user.id }, returning: true });
+            } else {
+                // Create new KYC record
+                ninInDB = await Kyc.create(kycData);
+            }
+    
+            // Verify NIN with external service
+            const verifyNin = await kegowWalletService.verifyNin(nin, dob, imageUrl);
+    
+            if (verifyNin?.message === "NIN verification completed") {
+                // Update KYC status to "accepted" if verification is successful
+                await Kyc.update({ status: "accepted", kegowId:verifyNin?.ninData.tid }, { where: { id: ninInDB.id } });
+            }
+    
+            // Respond with success message and data
+            res.status(200).json({
+                status: "success",
+                message: 'Upload successful',
+                data: ninInDB,
+                verification_service_response: verifyNin,
+            });
+    
+        } catch (error) {
+            console.error('Upload error:', error);
+    
+            // Handle specific error types
+            if (error instanceof NotFoundError) {
+                return res.status(404).json({ message: error.message });
+            }
+    
+            // Generic error response
+            res.status(500).json({ message: 'Upload failed', error: error.message });
+        }
+    }
+
+   
+    static async getNin(req, res){
+        try {
+            const user = await User.findOne({ where: { id: req.params.id } });
+
+            if (!user) {
+                return res.status(400).json({ message: 'invalid user id supplied' });
+            }
+            const nin = await Kyc.findOne({ where: { userId: user.id, identificationDocument: "NIN", status: "accepted" } });
+            if(nin){
+                res.status(200).json({status:"success", data:nin});
+            }else{
+                res.status(400).json({status:"fail", message: 'NIN not found'});
+            }
+        } catch (error) {
+            res.status(400).json({status:"fail", message: error.message});
+        }
+    }
+
+    
 }
 
 module.exports = UserController;

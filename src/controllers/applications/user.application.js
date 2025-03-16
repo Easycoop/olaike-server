@@ -37,9 +37,9 @@ class UserApplicationsController {
                     status: 'pending',
                 });
 
-                const wallet = await Wallet.findOne({ where: { groupId: group } });
+                // const wallet = await Wallet.findOne({ where: { groupId: group } });
 
-                await wallet.increment('balance', { by: wallet.entranceFee });
+                // await wallet.increment('balance', { by: wallet.entranceFee });
 
                 LogService.createLog('SERVICE', null, 'user', 'new user registration');
                 AuthMailService.sendRegistrationComplete({ email, firstName, lastName });

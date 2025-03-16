@@ -159,7 +159,7 @@ class AuthController {
     }
 
     static async signup(req, res) {
-        const { firstName, lastName, email, password, phone } = req.body;
+        const { firstName, lastName, email, password, phone, group, gender, referralCode} = req.body;
         const uniqueString = randString();
         const t = await sequelize.transaction(); // Start a transaction
 
@@ -174,6 +174,8 @@ class AuthController {
                     lastName: lastName,
                     email: email,
                     phone: phone,
+                    gender:gender,
+                    referralCode:referralCode,
                     uniqueString: uniqueString,
                 },
                 { transaction: t },

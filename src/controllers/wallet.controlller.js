@@ -1,5 +1,6 @@
-const { Wallet, SubWallet } = require('../database/models/index');
+const { Wallet, SubWallet, User, Kyc } = require('../database/models/index');
 const { BadRequestError, NotFoundError, InternalServerError } = require('../utils/error');
+const kegowWalletService = require('../services/kegow.service/wallets');
 
 class WalletController {
     // Create a new wallet
@@ -128,6 +129,35 @@ class WalletController {
             res.status(204).send();
         } catch (error) {
             next(new InternalServerError('Failed to delete wallet'));
+        }
+    }
+
+    static async generatePaymentWallet(req, res){
+        
+        
+        try {
+            await User.update({ kegowPhoneId: 120 }, { where: { id: req.params.id } });
+            // return res.status(200).json({ message: 'Kegow phone id updated' });
+            const user = await User.findOne({ where: { id: req.params.id } });
+            if (!user) {
+                return res.status(400).json({ message: 'invalid user id supplied' });
+            }
+            const kycData = await Kyc.findOne({ where: { userId: user.id, status: "accepted",  } });
+            if (!kycData) {
+                return res.status(400).json({ message: 'User kyc is not complete' });
+            }
+
+            // console.log(user);
+            // return res.status(200).json({status:"success", user:user, kyc: kycData});
+            
+            const generateKegowWallet = await kegowWalletService.create("olaike-"+user.id, "olaike_"+user.firstName+"_"+user.lastName, kycData.kegowId, user.kegowPhoneId);
+            if(generateKegowWallet){
+                return res.status(200).json({status:"success", data:generateKegowWallet});
+                Wallet.update({ kegowAccount: generateKegowWallet.walletId }, { where: { userId: user.id } });
+            }
+           
+        } catch (error) {
+            return res.status(400).json({status:"fail", data:error?.message});
         }
     }
 }

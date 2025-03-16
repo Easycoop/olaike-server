@@ -3,8 +3,8 @@ const axios = require('axios');
 /*  
     Paystack keys
 */
-const paystack_base_url = process.env.PAYSTACK_BASE_URL;
-const paystack_secret_key = process.env.PAYSTACK_SECRET_KEY;
+const paystack_base_url = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
+const paystack_secret_key = process.env.PAYSTACK_SECRET_KEY || 'sk_test_d3a04557a661db4eecd4507293b94c82d1149d15';
 
 /*
     Make a POST request 

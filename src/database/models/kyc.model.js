@@ -16,6 +16,18 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
+            documentIdentifier: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
+            documentFile: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            kegowId:{
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             status: {
                 type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
                 defaultValue: 'pending', // Initial status is pending

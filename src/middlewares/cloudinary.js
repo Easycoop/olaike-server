@@ -1,12 +1,12 @@
 require('dotenv').config();
 const sharp = require('sharp');
-import { cloudinary } from '../config/cloudinary';
+const {cloudinary} =  require('../config/cloudinary');
 
 const uploadtocloudinary = async (fileBuffer, details) => {
     try {
         const options = {
             use_filename: true,
-            folder: `Shop-Town/${details.user}/${details.folder}`,
+            folder: `olaikecoop/${details.folder}`,
             public_id: details.name,
         };
 
